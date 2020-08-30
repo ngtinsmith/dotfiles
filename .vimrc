@@ -6,11 +6,11 @@ noremap <silent> <C-Down>  :res -1<CR>
 noremap <silent> <C-Left>  :vertical resize -5<CR>
 noremap <silent> <C-Right> :vertical resize +5<CR>
 
-" Tab shifting - Normal mode
+" Tab shifting
 nnoremap <Tab> >>
 nnoremap <S-Tab> <<
 
-" Tab shifting - Visual mode (keep selection)
+" Tab shifting - VISUAL (keep selection)
 vnoremap <Tab> >gv
 vnoremap <S-Tab> <gv
 
@@ -34,8 +34,7 @@ nnoremap <C-k> <C-w>k
 nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
 nnoremap <silent> <Leader><Tab> :b#<CR>
-nnoremap <silent> <Leader>vs :vs<CR>
-nnoremap <silent> <Leader>sp :sp<CR>
+nnoremap <silent> <Leader>sp :vs<CR>
 
 " Visually select function block
 nnoremap <Leader>vf va{V
@@ -63,6 +62,10 @@ nnoremap <Leader>sv :so ~/.vimrc<CR> <BAR> :echo '~/.vimrc reloaded'<CR>
 " nnoremap <silent> <Leader>rt :!tmux source-file %<CR>| :echom 'TMUXs reloaded'
 " nnoremap <Leader>rt :!tmux source-file %<CR> | :echo '~/.tmux.conf reloaded'
 
+" Filetypes
+augroup bashalias
+    autocmd BufRead,BufNewFile *.aliases set filetype=sh
+augroup END
 
 " ====================================================== */
 " General Settings

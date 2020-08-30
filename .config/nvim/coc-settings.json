@@ -1,0 +1,36 @@
+{
+    "suggest.noselect": false,
+    "suggest.enablePreselect": true,
+    "coc.preferences.rootPatterns": [
+        "style.css",
+        "header.php",
+        "footer.php",
+        "webpack.dev.js",
+        "webpack.prod.js"
+    ],
+    "coc.preferences.formatOnSaveFiletypes": [
+        "vue",
+        "css",
+        "scss",
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact",
+        "json",
+        "html"
+    ],
+    "list.insertMappings": {
+        "<A-x>": "do:defaultaction",
+        "<A-j>": "normal:j",
+        "<A-k>": "normal:k"
+    },
+    "emmet.includeLanguages": {
+        "javascript": "javascriptreact",
+        "vue-html": "html",
+        "php": "html"
+    },
+    "emmet.syntaxProfiles": {
+        "php": "html"
+    },
+    "vetur.format.defaultFormatter.html": "none"
+}

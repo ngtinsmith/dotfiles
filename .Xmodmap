@@ -1,0 +1,22 @@
+keycode 135 = Caps_Lock
+keycode 66 = Escape
+
+! Alt_R remap to Super
+! clear mod4
+! keycode 108 = Super_R
+! add mod4 = Super_R
+
+! Set Mode_switch
+! keycode 108 = Mode_switch
+
+! Ctrl hjkl
+! keycode 43 = h H Left Left
+! keycode 44 = j J Down Down
+! keycode 45 = k K Up Up
+! keycode 46 = l L Right Right
+
+! Map AltGr as mod for hjkl text nav
+! keycode 43 = h H NoSymbol NoSymbol Left NoSymbol
+! keycode 44 = j J NoSymbol NoSymbol Down NoSymbol
+! keycode 45 = k K NoSymbol NoSymbol Up NoSymbol
+! keycode 46 = l L NoSymbol NoSymbol Right NoSymbol
