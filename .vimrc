@@ -1,16 +1,13 @@
 let mapleader=' '
 
-" Window resize
 noremap <silent> <C-Up>    :res +1<CR>
 noremap <silent> <C-Down>  :res -1<CR>
 noremap <silent> <C-Left>  :vertical resize -5<CR>
 noremap <silent> <C-Right> :vertical resize +5<CR>
 
-" Tab shifting
+" Tab shifting - (keep selection)
 nnoremap <Tab> >>
 nnoremap <S-Tab> <<
-
-" Tab shifting - VISUAL (keep selection)
 vnoremap <Tab> >gv
 vnoremap <S-Tab> <gv
 
@@ -67,6 +64,7 @@ augroup bashalias
     autocmd BufRead,BufNewFile *.aliases set filetype=sh
 augroup END
 
+
 " ====================================================== */
 " General Settings
 " ====================================================== */
@@ -74,11 +72,16 @@ augroup END
 " Hybrid line number
 set relativenumber number
 
+" Tabs
 set expandtab
 set smarttab
 set tabstop=4
 set shiftwidth=4
 set softtabstop=0
+
+" Some servers have issues with backup files, see #649 (coc).
+set nobackup
+set nowritebackup
 set noswapfile
 
 " Indents
@@ -337,10 +340,6 @@ let g:vue_pre_processors = ['scss']
 " COC
 " ====================================================== */
 
-" Some servers have issues with backup files, see #649.
-set nobackup
-set nowritebackup
-
 " Give more space for displaying messages.
 set cmdheight=1
 
@@ -536,7 +535,6 @@ augroup myCmds
     au!
     autocmd VimEnter * silent !echo -ne "\e[2 q"
 augroup END
-
 
 
 " ====================================================== */
