@@ -1,15 +1,8 @@
 let mapleader=' '
 
-noremap <silent> <C-Up>    :res +1<CR>
-noremap <silent> <C-Down>  :res -1<CR>
-noremap <silent> <C-Left>  :vertical resize -5<CR>
-noremap <silent> <C-Right> :vertical resize +5<CR>
-
-" Tab shifting - (keep selection)
-nnoremap <Tab> >>
-nnoremap <S-Tab> <<
-vnoremap <Tab> >gv
-vnoremap <S-Tab> <gv
+" Command Mode
+nnoremap , :
+vnoremap , :
 
 " Navigation - Text
 nnoremap H ^
@@ -33,14 +26,28 @@ nnoremap <C-l> <C-w>l
 nnoremap <silent> <Leader><Tab> :b#<CR>
 nnoremap <silent> <Leader>sp :vs<CR>
 
+noremap <silent> <C-Up>    :res +1<CR>
+noremap <silent> <C-Down>  :res -1<CR>
+noremap <silent> <C-Left>  :vertical resize -5<CR>
+noremap <silent> <C-Right> :vertical resize +5<CR>
+
+" Tab shifting - (keep selection)
+nnoremap <Tab> >>
+nnoremap <S-Tab> <<
+vnoremap <Tab> >gv
+vnoremap <S-Tab> <gv
+
 " Visually select function block
 nnoremap <Leader>vf va{V
 
 " Search - unset highlight from last search pattern onEnter (carriage return)
 nnoremap <silent> <CR> :nohlsearch<CR>
 
-" Terminal -> Normal mode 
+" Integrated Terminal to Normal mode 
 tnoremap kk <C-\><C-n>
+
+" Suspend Vim to open full shell prompt (write fg in shell to put V into foreground)
+nnoremap <Leader>sh :sus<CR>
 
 " Git [vim-fugitive]
 nnoremap <silent><nowait> <Leader>gs :G<CR> 
@@ -90,6 +97,7 @@ set autoindent copyindent
 " Search casing
 set ignorecase smartcase
 
+set noshowmode
 set showmatch
 set hidden
 set splitright
@@ -115,7 +123,7 @@ filetype plugin indent on
 call plug#begin('~/.vim/plugged')
 
 " Overrides
-Plug 'nelstrom/vim-visual-star-search'
+" Plug 'nelstrom/vim-visual-star-search'
 
 " Session
 Plug 'tpope/vim-obsession'
@@ -178,6 +186,16 @@ call plug#end()
 " True colors
 set termguicolors
 set background=dark
+
+" Override any highlighting: 
+function! MyHighlights() abort
+    highlight Normal     cterm=NONE ctermbg=17              gui=NONE guifg=#ffffff
+endfunction
+
+augroup MyColors
+    autocmd!
+    autocmd ColorScheme * call MyHighlights()
+augroup END
 
 " Theme: Ayu
 " Variants: [
@@ -419,8 +437,8 @@ autocmd CursorHold * silent call CocActionAsync('highlight')
 nmap <F2> <Plug>(coc-rename)
 
 " Formatting selected code.
-xmap <leader>f  <Plug>(coc-format-selected)
-nmap <leader>f  <Plug>(coc-format-selected)
+" xmap <leader>f  <Plug>(coc-format-selected)
+" nmap <leader>f  <Plug>(coc-format-selected)
 
 augroup mygroup
     autocmd!
@@ -544,7 +562,7 @@ augroup END
 let g:fzf_preview_window = 'right:40%'
 let g:fzf_layout = { 'window': { 'width': 0.8, 'height': 0.6, 'yoffset': 0.85 } }
 
-nnoremap <silent> <Leader>ff :Files<CR>
+nnoremap <silent> <Leader>hh :Files<CR>
 nnoremap <silent> <C-p> :ProjectFiles<CR>
 nnoremap <silent> <Leader>p1 :ProjectFiles1<CR>
 nnoremap <silent> <Leader>p2 :ProjectFiles2<CR>
@@ -678,13 +696,16 @@ endfunction
 
 
 " ====================================================== */
-" Search - Star(*) Search
+" Search - via Visual Star(*) Search
+"
+" http://got-ravings.blogspot.com/2008/07/vim-pr0n-visual-search-mappings.html
 " ====================================================== */
 
 " Search visually selected (without jump using vim-visual-star-search)
-nnoremap <C-f> viw:<C-u>call <SID>VSetSearch('/')<CR>:set hls<CR><Esc>
+nnoremap <silent> <C-f> viw:<C-u>call <SID>VSetSearch('/')<CR>:set hls<CR><Esc>
 
 " Search func from visual-star-search
+" makes * and # work on visual mode too.
 function! s:VSetSearch(cmdtype)
   let temp = @s
   norm! gv"sy
@@ -692,13 +713,28 @@ function! s:VSetSearch(cmdtype)
   let @s = temp
 endfunction
 
+" With jump
+" xnoremap * :<C-u>call <SID>VSetSearch('/')<CR>/<C-R>=@/<CR><CR>
+" xnoremap # :<C-u>call <SID>VSetSearch('?')<CR>?<C-R>=@/<CR><CR>
+
+" Without jump
+xnoremap * :<C-u>call <SID>VSetSearch('/')<CR>:set hls<CR>
+
+" recursively vimgrep for word under cursor or selection if you hit leader-star
+if maparg('<leader>*', 'n') == ''
+  nmap <leader>* :execute 'noautocmd vimgrep /\V' . substitute(escape(expand("<cword>"), '\'), '\n', '\\n', 'g') . '/ **'<CR>
+endif
+if maparg('<leader>*', 'v') == ''
+  vmap <leader>* :<C-u>call <SID>VSetSearch()<CR>:execute 'noautocmd vimgrep /' . @/ . '/ **'<CR>
+endif
+
 
 " ====================================================== */
 " Emmet
 " ====================================================== */
 
 " Full command `<C-Z>,` (including comma)
-let g:user_emmet_leader_key='<C-Z>'
+let g:user_emmet_leader_key='<C-X>'
 
 
 
