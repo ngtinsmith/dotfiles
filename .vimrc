@@ -197,6 +197,11 @@ augroup MyColors
     autocmd ColorScheme * call MyHighlights()
 augroup END
 
+augroup highlight_yank
+    autocmd!
+    au TextYankPost * silent! lua vim.highlight.on_yank { higroup='IncSearch', timeout=200 }
+augroup END
+
 " Theme: Ayu
 " Variants: [
 "   light, dark, mirage
@@ -735,6 +740,7 @@ endif
 
 " Full command `<C-Z>,` (including comma)
 let g:user_emmet_leader_key='<C-X>'
+
 
 
 
