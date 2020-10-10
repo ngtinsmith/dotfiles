@@ -1,8 +1,14 @@
 let mapleader=' '
 
+inoremap jj <Esc>
+inoremap jk <Esc>
+inoremap kj <Esc>
+
 " Command Mode
 nnoremap , :
 vnoremap , :
+nnoremap : , 
+vnoremap : , 
 
 " Navigation - Text
 nnoremap H ^
@@ -241,6 +247,7 @@ hi SignColumn guibg=NONE ctermbg=NONE
 " ====================================================== */
 
 set laststatus=2
+" TODO: component_function with node compiler hook
 
 " Statuslines: [
 "   ayu_dark, ayu_mirage, powerlineish, material_vim(req+theme),
@@ -248,7 +255,7 @@ set laststatus=2
 "   selenized_black(white, dark, light)
 " ]
 let g:lightline = {
-    \   'colorscheme': 'palenight',
+    \   'colorscheme': 'deus',
     \   'active': {
     \     'left':[
     \       [ 'mode', 'paste' ],
@@ -309,7 +316,7 @@ function! BufferCounter()
     let bufcount = len(getbufinfo({'buflisted':1}))
 
     if (bufcount > 1)
-        return 'bufn: ' .bufcount
+        return 'b: ' .bufcount
     endif
     return ''
 endfunction
