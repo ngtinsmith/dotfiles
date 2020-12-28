@@ -1,5 +1,5 @@
-keycode 135 = Caps_Lock
-keycode 66 = Escape
+! keycode 135 = Caps_Lock
+! keycode 66 = Escape
 
 ! Alt_R remap to Super
 ! clear mod4

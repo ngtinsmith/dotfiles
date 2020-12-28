@@ -26,8 +26,9 @@ else
   export EDITOR='nvim'
 fi
 
-# Enable Vim mode
-bindkey -v
+# ============================================================== /
+# Vim mode
+
 export KEYTIMEOUT=1
 
 # Use vim keys in tab complete menu:
@@ -36,9 +37,6 @@ bindkey -M menuselect 'k' vi-up-line-or-history
 bindkey -M menuselect 'l' vi-forward-char
 bindkey -M menuselect 'j' vi-down-line-or-history
 bindkey -v '^?' backward-delete-char
-
-bindkey "k" up-line
-bindkey "j" down-line
 
 # Text navigation
 bindkey -M vicmd 'L' vi-end-of-line
@@ -66,7 +64,7 @@ zle -N zle-line-init
 echo -ne '\e[5 q' # Use beam shape cursor on startup.
 precmd() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
 
-# Text Motions - Change ( ci", ci', ci`, di", etc ) 
+# Text Motions - Change ( ci", ci', ci`, di", etc )
 autoload -U select-quoted
 zle -N select-quoted
 for m in visual viopp; do
@@ -84,24 +82,11 @@ for m in visual viopp; do
   done
 done
 
-# Set AltGr fix layout
-setxkbmap -layout us -variant altgr-intl -option nodeadkeys
-
-# Initiate Key Remaps
+# Initiate Key Remaps (e.g, Caps as Esc)
 xmodmap ~/.Xmodmap
-
 
 # ============================================================== /
 # FZF
-# ============================================================== /
-
-# Quick chekcout
-fbr() {
-  local branches branch
-  branches=$(git --no-pager branch -vv) &&
-  branch=$(echo "$branches" | fzf +m) &&
-  git checkout $(echo "$branch" | awk '{print $1}' | sed "s/.* //")
-}
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
@@ -119,17 +104,44 @@ RG_IGNORE="'!{.git,node_modules,vendor}/*'"
 export FZF_DEFAULT_COMMAND="rg --files --hidden -g $RG_IGNORE"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
+# FZF Git Checkout
+fgc() {
+  local branches branch
+  branches=$(git --no-pager branch -vv) &&
+  branch=$(echo "$branches" | fzf +m) &&
+  git checkout $(echo "$branch" | awk '{print $1}' | sed "s/.* //")
+}
+
+# FZF file search via ripgrep and expands argument(s) as path(s)
+fra() {
+  local files file
+  files=$(rg --files $*) &&
+  file=$(echo "$files" | fzf +m | sed 's/.*/"&"/')
+  [[ "$file" = "" ]] && return || echo "$file" | xargs nvim
+}
+
+# ============================================================== /
 # Kitty
+
 autoload -Uz compinit
 compinit
 
-# Kitty - Completion
+# Completion
 kitty + complete setup zsh | source /dev/stdin
 
+# ============================================================== /
 # Alacritty
+
 fpath+=${ZDOTDIR:-~}/.zsh_functions
 
-# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-export PATH="$PATH:$HOME/.rvm/bin"
+# ============================================================== /
+# $PATH variables
 
-# END
+export PATH="$PATH:$HOME/neovim/bin"
+
+# Source NVM
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+
+# Add RVM to path for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"
