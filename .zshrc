@@ -83,7 +83,8 @@ for m in visual viopp; do
 done
 
 # Initiate Key Remaps (e.g, Caps as Esc)
-xmodmap ~/.Xmodmap
+# only for X server
+# xmodmap ~/.Xmodmap
 
 # ============================================================== /
 # FZF
@@ -94,14 +95,16 @@ export FZF_DEFAULT_OPTS="
     --reverse
     --multi
     --inline-info
-    --height 30% -1
-    --bind alt-j:down,alt-k:up
+    --height 50% -1
 "
+# Use c-n / c-p instead of this
+# --bind alt-j:down,alt-k:up
 
 # Ripgrep for FZF
-RG_IGNORE="'!{.git,node_modules,vendor}/*'"
+RG_IGNORE="'!{.git,node_modules,vendor,dist,build}/*'"
+# RG_IGNORE="'!{.git,node_modules,**/node_modules,vendor,dist,**/dist,build}/*'"
 
-export FZF_DEFAULT_COMMAND="rg --files --hidden -g $RG_IGNORE"
+export FZF_DEFAULT_COMMAND="rg --no-require-git --files --hidden -g $RG_IGNORE"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 # FZF Git Checkout
@@ -137,11 +140,20 @@ fpath+=${ZDOTDIR:-~}/.zsh_functions
 # ============================================================== /
 # $PATH variables
 
-export PATH="$PATH:$HOME/neovim/bin"
+export QT_QPA_PLATFORM=xcb
 
 # Source NVM
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 
 # Add RVM to path for scripting. Make sure this is the last PATH variable change.
-export PATH="$PATH:$HOME/.rvm/bin"
+# export PATH="$PATH:$HOME/.rvm/bin"
+
+# Nvim
+# export PATH="$PATH:$HOME/neovim/bin"
+
+# QMK
+export PATH="$PATH:$HOME/.local/bin"
+
+# Yarn
+export PATH="$PATH:$HOME/.yarn/bin"

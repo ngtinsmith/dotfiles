@@ -24,7 +24,6 @@ vnoremap k gk
 nnoremap <C-h> gT
 nnoremap <C-l> gt
 nnoremap <silent> <Leader><Tab> :b#<CR>
-nnoremap <silent> <Leader>sp :vs<CR>
 
 noremap <silent> <C-Up>    :res +1<CR>
 noremap <silent> <C-Down>  :res -1<CR>
@@ -51,13 +50,32 @@ nnoremap <Leader>sh :sus<CR>
 
 " Git [vim-fugitive]
 nnoremap <silent><nowait> <Leader>gs :G<CR>
+nnoremap <silent><nowait> <Leader>gd :Git diff<CR>
 
 " Commenting
 vmap <Leader>cc <Plug>Commentary
 nmap <Leader>cc <Plug>CommentaryLine<CR>
 
+" Comment shortcut like in VSCode
+" this works because vim register <C-/> as <C-_>
+vmap <C-_> <Plug>Commentary<Bar>gv
+nmap <C-_> <Plug>CommentaryLine
+
 " Retain "p" register when pasting over a selection
 vnoremap <leader>p "_dP
+
+" Quickfix List
+function! ToggleQuickFix()
+    if empty(filter(getwininfo(), 'v:val.quickfix'))
+        copen 50
+    else
+        cclose
+    endif
+endfunction
+
+nnoremap <silent> <leader>q :call ToggleQuickFix()<CR>
+nnoremap <silent> <C-j> :cprev<CR>
+nnoremap <silent> <C-k> :cnext<CR>
 
 " Quick vimrc refresh
 nnoremap <Leader>sv :so ~/.vimrc<CR> <BAR> :echom '~/.vimrc reloaded'<CR>
@@ -72,11 +90,12 @@ augroup bashalias
     autocmd BufRead,BufNewFile *.aliases set filetype=sh
 augroup END
 
-" ==============================================================================
 " Defaults
+" ==============================================================================
 
-" Hybrid line number
+" Sign/LineNr Column
 set relativenumber number
+set fillchars=vert:▏
 
 " Tabs
 set expandtab
@@ -85,10 +104,13 @@ set tabstop=4
 set shiftwidth=4
 set softtabstop=0
 
-set autoindent copyindent
+" Text
+set copyindent autoindent
 set ignorecase smartcase
 set noshowmode
 set showmatch
+
+" Window
 set hidden
 set splitright
 set splitbelow
@@ -98,11 +120,8 @@ set signcolumn=yes
 set nofoldenable
 set clipboard=unnamedplus
 
-set redrawtime=8000
-" set regexpengine=1
-
 " Native autocomplete
-set completeopt=menuone,noinsert
+set completeopt=menuone,noselect
 
 " time out for key codes
 " wait up to 100ms after Esc for special key
@@ -119,26 +138,10 @@ set laststatus=2
 
 filetype plugin indent on
 
-" ==============================================================================
 " Plugins
+" ==============================================================================
 
 call plug#begin('~/.vim/plugged')
-
-" Colorschemes
-Plug 'dracula/vim', { 'as': 'dracula' }
-Plug 'drewtempelmeyer/palenight.vim'
-Plug 'kaicataldo/material.vim'
-Plug 'flrnprz/plastic.vim'
-Plug 'morhetz/gruvbox'
-Plug 'nanotech/jellybeans.vim'
-Plug 'arcticicestudio/nord-vim'
-Plug 'joshdick/onedark.vim'
-Plug 'rakr/vim-one'
-Plug 'embark-theme/vim', { 'as': 'embark' }
-Plug 'franbach/miramare'
-Plug 'bluz71/vim-moonfly-colors'
-Plug 'bluz71/vim-nightfly-guicolors'
-Plug 'tomasiser/vim-code-dark'
 
 " Session
 Plug 'tpope/vim-obsession'
@@ -148,49 +151,59 @@ Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'vifm/vifm.vim'
 
-" Syntax highlighting
-Plug 'sheerun/vim-polyglot'
-Plug 'Yggdroot/indentLine'
-
 " Completion and Linting
 Plug 'dense-analysis/ale'
 Plug 'neovim/nvim-lspconfig'
-Plug 'nvim-lua/completion-nvim'
-Plug 'steelsojka/completion-buffers'
+Plug 'hrsh7th/nvim-compe'
 
 " Snippets
 Plug 'honza/vim-snippets'
 Plug 'hrsh7th/vim-vsnip'
-Plug 'hrsh7th/vim-vsnip-integ'
 
-" Utils
+" Syntax highlighting
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'nvim-treesitter/playground'
+
+" Helpers
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
-Plug 'tmsvg/pear-tree'
+Plug 'windwp/nvim-autopairs'
+Plug 'windwp/nvim-ts-autotag'
 
+" Format
 Plug 'lukas-reineke/format.nvim'
+Plug 'mhartington/formatter.nvim'
 
 " Git
 Plug 'airblade/vim-gitgutter'
 Plug 'tpope/vim-fugitive'
 
-" Statusline
+" UI
 Plug 'itchyny/lightline.vim'
+Plug 'lukas-reineke/indent-blankline.nvim', {'branch': 'lua' }
+
+" Colorschemes
+Plug 'dracula/vim', { 'as': 'dracula' }
+Plug 'drewtempelmeyer/palenight.vim'
+Plug 'arcticicestudio/nord-vim'
+Plug 'joshdick/onedark.vim'
+Plug 'embark-theme/vim', { 'as': 'embark' }
+Plug 'bluz71/vim-moonfly-colors'
+Plug 'bluz71/vim-nightfly-guicolors'
+Plug 'mhartington/oceanic-next'
+Plug 'folke/tokyonight.nvim'
+
+Plug 'marko-cerovac/material.nvim'
+Plug 'shaunsingh/moonlight.nvim'
+Plug 'arzg/vim-substrata'
 
 call plug#end()
 
-" ==============================================================================
 " Themes - Colorschemes
+" ==============================================================================
 
-" True colors
 set termguicolors
 set background=dark
-
-" augroup FgOverride
-"     autocmd!
-"     autocmd ColorScheme * highlight
-"         \ Normal cterm=NONE ctermbg=17 gui=NONE guifg=#ffffff
-" augroup END
 
 augroup highlight_yank
     autocmd!
@@ -198,32 +211,79 @@ augroup highlight_yank
         \ { higroup='IncSearch', timeout=150 }
 augroup END
 
+augroup ColorSchemeOverride
+    autocmd!
+    autocmd ColorScheme * call HLOverride()
+augroup END
+
+function! HLOverride() abort
+    " Common Groups
+    " hi Normal                   guibg=NONE ctermbg=NONE
+    " hi SignColumn               guibg=NONE ctermbg=NONE
+    " hi LineNr                   guibg=NONE ctermbg=NONE
+    " hi CursorLineNr             guibg=NONE ctermbg=NONE
+    " hi EndOfBuffer              guibg=NONE ctermbg=NONE
+
+    " UI
+    " IndentLine: neutral-grey,
+    " LineNr: [#6272A4, #676E95, #595E7B] }
+    " hi IndentBlanklineChar      guifg=#424450 ctermfg=238
+    hi CursorLineNr             guifg=#c0caf5 ctermfg=0
+    hi LineNr                   guifg=#595E7B
+    
+
+    " Material - palenight
+    " Markdown: { green: #1abc9c, yellowTan: #ecc48d, purple: #AB47BC }
+    hi Normal                   guifg=#c9d1d9
+    hi markdownCode             guifg=#ecc48d
+    hi markdownCodeDelimiter    guifg=#ecc48d
+    hi link markdownListMarker  Comment
+
+    " Dracula
+    " hi Todo                     cterm=bold guifg=#8BE9FD guibg=none gui=bold term=bold
+
+    " TokyoNight
+    " hi Todo                     guibg=NONE ctermbg=NONE guifg=#e0af68 ctermfg=11 gui=bold term=bold
+    " hi link ALEWarningSign      Todo
+    " hi link ALEStyleWarningSign Todo
+
+    " Embark
+    " hi Todo                                 guibg=NONE ctermbg=NONE 
+    " hi GitGutterAdd                         guibg=NONE ctermbg=NONE 
+    " hi GitGutterDelete                      guibg=NONE ctermbg=NONE 
+    " hi GitGutterChange                      guibg=NONE ctermbg=NONE 
+    " hi GitGutterChangeDelete                guibg=NONE ctermbg=NONE 
+    " hi ALEErrorSign                         guibg=NONE ctermbg=NONE 
+    " hi ALEWarningSign                       guibg=NONE ctermbg=NONE 
+    " hi LspDiagnosticsDefaultHint            guibg=NONE ctermbg=NONE
+    " hi LspDiagnosticsDefaultError           guibg=NONE ctermbg=NONE
+    " hi LspDiagnosticsDefaultWarning         guibg=NONE ctermbg=NONE
+    " hi LspDiagnosticsDefaultInformation     guibg=NONE ctermbg=NONE
+    " hi LineNr                               guifg=#6272A4 ctermfg=61 
+endfunction
+
 " Theme: Palenight
 let g:palenight_terminal_italics = 1
 
-" Theme: Material
-" Variants: [
-"   default, palenight, ocean, lighter, darker
-"   (default|palenight|ocean|lighter|darker)-community ]
-let g:material_terminal_italics = 1
-let g:material_theme_style = 'default'
+" Theme: TokyoNight [storm, night, day]
+let g:tokyonight_style = "night"
+" let g:tokyonight_transparent = 1
+
+" Theme: Material nvim
+" ['darker', 'lighter', 'palenight', 'oceanic' and 'deep ocean', 'moonlight']
+" nnoremap <C-m> :lua require('material.functions').toggle_style()<CR>
+
+let g:material_style = 'palenight'  
+let g:material_variable_color = '#c9d1d9' " #b0b7bf, #c9d1d9
+let g:material_custom_colors = { 'accent': '#c9d1d9' }
 
 " Colorschemes: [
-"   palenight, material, dracula, gruvbox, codedark, moonfly, nightfly
-"   jellybeans, nord, onedark, one, embark, miramare ]
-colorscheme embark
+"   palenight, dracula, moonfly, nightfly, material
+"   nord, onedark, embark, OceanicNext, tokyonight, substrata ]
+colorscheme material
 
-" Indent Markers
-let g:indentLine_char = '⎸'
-
-" Overrides
-hi Normal       guibg=NONE ctermbg=NONE
-hi SignColumn   guibg=NONE ctermbg=NONE
-hi LineNr       guibg=NONE ctermbg=NONE
-hi CursorLineNr guibg=NONE ctermbg=NONE
-
-" ==============================================================================
 " Themes - Statusline
+" ==============================================================================
 
 " TODO: component_function with node compiler hook
 
@@ -281,8 +341,8 @@ function! LightlineFugitive() abort
     return ''
 endfunction
 
-" ==============================================================================
 " Nvim LSP
+" ==============================================================================
 
 nnoremap <silent> gd    <cmd>lua vim.lsp.buf.definition()<CR>
 nnoremap <silent> gh    <cmd>lua vim.lsp.buf.hover()<CR>
@@ -292,40 +352,257 @@ nnoremap <silent> gr    <cmd>lua vim.lsp.buf.references()<CR>
 nnoremap <silent> g0    <cmd>lua vim.lsp.buf.document_symbol()<CR>
 nnoremap <silent> gW    <cmd>lua vim.lsp.buf.workspace_symbol()<CR>
 
-" LSP Configs
+" Nvim Compe
+" ==============================================================================
+
+inoremap <silent><expr> <C-e>   compe#complete()
+inoremap <silent><expr> <CR>    compe#confirm('<CR>')
+inoremap <silent><expr> <C-f>   compe#scroll({ 'delta': +4 })
+inoremap <silent><expr> <C-d>   compe#scroll({ 'delta': -4 })
+
+" TODO organize as lua conf
+
 lua <<EOF
+
+    -- QuickFix List
+
+    do
+        local method = "textDocument/publishDiagnostics"
+        local default_handler = vim.lsp.handlers[method]
+        vim.lsp.handlers[method] = function(err, method, result, client_id, bufnr, config)
+            default_handler(err, method, result, client_id, bufnr, config)
+            local diagnostics = vim.lsp.diagnostic.get_all()
+            local qflist = {}
+            for bufnr, diagnostic in pairs(diagnostics) do
+                for _, d in ipairs(diagnostic) do
+                  d.bufnr = bufnr
+                  d.lnum = d.range.start.line + 1
+                  d.col = d.range.start.character + 1
+                  d.text = d.message
+                  table.insert(qflist, d)
+                end
+            end
+            vim.lsp.util.set_qflist(qflist)
+        end
+    end
+
+    -- Completion (compe)
+
+    require'compe'.setup {
+        enabled = true;
+        autocomplete = true;
+        debug = false;
+        min_length = 1;
+        preselect = 'always';
+        throttle_time = 80;
+        source_timeout = 200;
+        incomplete_delay = 400;
+        max_abbr_width = 100;
+        max_kind_width = 100;
+        max_menu_width = 100;
+        documentation = true;
+
+        source = {
+            path = true;
+            buffer = true;
+            calc = true;
+            nvim_lsp = true;
+            nvim_lua = true;
+            vsnip = true;
+        };
+    }
+
+    -- Use (s-)tab to:
+    --- move to prev/next item in completion menuone
+    --- jump to prev/next snippet's placeholder
+
+    _G.tab_complete = function()
+        if vim.fn.pumvisible() == 1 then
+            return t "<C-n>"
+        elseif vim.fn.call("vsnip#available", {1}) == 1 then
+            return t "<Plug>(vsnip-expand-or-jump)"
+        elseif check_back_space() then
+            return t "<Tab>"
+        else
+            return vim.fn['compe#complete']()
+        end
+    end
+
+    _G.s_tab_complete = function()
+        if vim.fn.pumvisible() == 1 then
+            return t "<C-p>"
+        elseif vim.fn.call("vsnip#jumpable", {-1}) == 1 then
+            return t "<Plug>(vsnip-jump-prev)"
+        else
+            return t "<S-Tab>"
+        end
+    end
+
+    local t = function(str)
+        return vim.api.nvim_replace_termcodes(str, true, true, true)
+    end
+
+    local check_back_space = function()
+        local col = vim.fn.col('.') - 1
+        if col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') then
+            return true
+        else
+            return false
+        end
+    end
+
+    vim.api.nvim_set_keymap("i", "<Tab>", "v:lua.tab_complete()", {expr = true})
+    vim.api.nvim_set_keymap("s", "<Tab>", "v:lua.tab_complete()", {expr = true})
+    vim.api.nvim_set_keymap("i", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
+    vim.api.nvim_set_keymap("s", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
+
+    -- LSP Snippets
+
+    local capabilities = vim.lsp.protocol.make_client_capabilities()
+    capabilities.textDocument.completion.completionItem.snippetSupport = true
+    capabilities.textDocument.completion.completionItem.resolveSupport = {
+        properties = {
+            'documentation',
+            'detail',
+            'additionalTextEdits',
+        }
+    }
+
+    -- Nvim autopairs
+
+    require('nvim-autopairs').setup()
+    local remap = vim.api.nvim_set_keymap
+    local npairs = require('nvim-autopairs')
+
+    -- skip it, if you use another global object
+    _G.MUtils= {}
+
+    vim.g.completion_confirm_key = ""
+    MUtils.completion_confirm=function()
+        if vim.fn.pumvisible() ~= 0  then
+            if vim.fn.complete_info()["selected"] ~= -1 then
+                return vim.fn["compe#confirm"](npairs.esc("<cr>"))
+            else
+                return npairs.esc("<cr>")
+            end
+        else
+            return npairs.autopairs_cr()
+        end
+    end
+
+    remap('i' , '<CR>','v:lua.MUtils.completion_confirm()', {expr = true , noremap = true})
+
+    -- Treesitter
+
+    -- TODO TS text-objects
+    -- TODO select function
+    -- TODO select object
+    -- TODO incrementally expand selection
+
+    require'nvim-treesitter.configs'.setup {
+        highlight = {
+            enable = true,
+            -- disable = { 'scss' }
+        },
+        indent = {
+            enable = false
+        },
+        autotag = {
+            enable = true,
+        },
+        playground = {
+            enable = false,
+            disable = {},
+            updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
+            persist_queries = false, -- Whether the query persists across vim sessions
+            keybindings = {
+                toggle_query_editor = 'o',
+                toggle_hl_groups = 'i',
+                toggle_injected_languages = 't',
+                toggle_anonymous_nodes = 'a',
+                toggle_language_display = 'I',
+                focus_language = 'f',
+                unfocus_language = 'F',
+                update = 'R',
+                goto_node = '<cr>',
+                show_help = '?',
+            },
+        },
+        query_linter = {
+            enable = true,
+            use_virtual_text = true,
+            lint_events = {"BufWrite", "CursorHold"},
+        },
+    }
+
+    -- LSP
+
     local lsp = require'lspconfig'
     local util = require 'lspconfig/util'
 
-    lsp.cssls.setup {}
-    lsp.tsserver.setup {}
-    lsp.vimls.setup {}
+    lsp.cssls.setup {
+        capabilities = capabilities,
+    }
+
+    lsp.tsserver.setup {
+        capabilities = capabilities,
+        settings = {
+            documentFormatting = true
+        }
+    }
+
+    lsp.vimls.setup {
+        capabilities = capabilities,
+    }
+
     lsp.vuels.setup {
+        on_attach = function(client)
+            --[[
+                Internal Vetur formatting is not supported out of the box
+
+                This line below is required if you:
+                    - want to format using Nvim's native `vim.lsp.buf.formatting**()`
+                    - want to use Vetur's formatting config instead, e.g, settings.vetur.format {...}
+            --]]
+            client.resolved_capabilities.document_formatting = true
+            on_attach(client)
+        end,
+        capabilities = capabilities,
         settings = {
             vetur = {
+                completion = {
+                    autoImport = true,
+                    useScaffoldSnippets = true
+                },
                 format = {
                     defaultFormatter = {
                         html = "none",
                         js = "prettier",
+                        ts = "prettier",
                     }
                 },
                 validation = {
                     template = true,
                     script = true,
                     style = true,
+                    templateProps = true,
+                    interpolation = true
                 },
                 experimental = {
-                    templateInterpolationService = false
-                },
+                    templateInterpolationService = true
+                }
             }
         },
-        root_dir = util.root_pattern("header.php", "package.json", "style.css")
+        root_dir = util.root_pattern("header.php", "package.json", "style.css", 'webpack.config.js')
     }
+
     lsp.intelephense.setup {
-        cmd = { "./node_modules/.bin/intelephense", "--stdio" },
+        capabilities = capabilities,
         settings = {
             intelephense = {
                 stubs = {
+                    -- Default stubs
+                    -- TODO: move to lua table
                     "apache",
                     "bcmath",
                     "bz2",
@@ -397,105 +674,103 @@ lua <<EOF
                     "Zend OPcache",
                     "zip",
                     "zlib",
+                    
+                    -- Custom stub
                     "wordpress",
                 }
             }
         },
-        root_dir = util.root_pattern(".git", "docker-compose.yml", "robots.txt")
+        root_dir = util.root_pattern(".git", "docker-compose.yml", "robots.txt", 'wp-config.php')
     }
 EOF
 
-" ==============================================================================
-" Completion
+" Indent Markers
+let g:indent_blankline_char = '▏'
+let g:indent_blankline_space_char = ' '
 
-" Use completion-nvim in every buffer
-augroup Completion
-    autocmd!
-    autocmd BufEnter * lua require'completion'.on_attach()
-augroup END
-
-let g:completion_matching_strategy_list = ['exact', 'fuzzy', 'substring']
-let g:completion_enable_snippet = 'vim-vsnip'
-let g:completion_sorting = "none"
-let g:completion_matching_ignore_case = 1
-let g:completion_chain_complete_list = {
-    \   'default': {
-    \     'default': [
-    \       {'complete_items': ['lsp', 'snippet', 'buffers']},
-    \       {'mode': '<c-p>'},
-    \       {'mode': '<c-n>'}],
-    \     'comment': [
-    \       {'complete_items': ['buffers']}],
-    \     'string': [
-    \       {'complete_items': ['path']}],
-    \   }
-    \ }
-
-inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-
-" ==============================================================================
 " Linting (ALE)
+" ==============================================================================
 
 let b:ale_disable_lsp = 1
 let g:ale_completion_enabled = 0
 let g:ale_sign_error = '■'
 let g:ale_sign_warning = '●'
 
-" let g:ale_fix_on_save = 1
+let g:ale_fix_on_save = 1
 let g:ale_fixers = { 'vue': ['eslint'] }
+
+let g:ale_javascript_eslint_executable = 'eslint_d'
+let g:ale_typescript_eslint_executable = 'eslint_d'
+let g:ale_vue_eslint_executable = 'eslint_d'
+
 let g:ale_linters_explicit = 1
 let g:ale_linters = {
+    \   'typescript': ['eslint', 'tsserver'],
     \   'javascript': ['eslint', 'tsserver'],
     \   'vue': ['eslint', 'vls'],
-    \   'php': ['php', 'langserver']
+    \   'php': ['php']
     \ }
-    " \   'php': ['php', 'langserver', 'intelephense']
-let g:ale_php_langserver_executable = $HOME.'/.config/composer/vendor/bin/php-language-server.php'
-let g:ale_php_langserver_use_global = 1
-" let g:ale_php_intelephense_use_global = 0
-" let g:ale_php_intelephense_executable = './node_modules/.bin/intelephense'
-" let g:ale_php_intelephense_config = { 'stubs': [ 'wordpress' ], 'files': { 'associations': ['*.php'] }, 'trace': { 'server': 'verbose' } }
 
-" ==============================================================================
 " Formatting
-
-" TODO fix runtime error when starting Vim session with a non *.vue file
-"      `../nvim/runtime/lua/vim/lsp/buf.lua:142: attempt to index a nil value`
-"      [active bug]: https://github.com/neovim/neovim/issues/12865
-" TODO check for tsserver LSP update with support for ...buf.formatting_sync()
-"       { ...`FormattinOptions` } param
+" ==============================================================================
 
 " Vue formatter via Vetur formatter config
-autocmd BufWritePre *.vue call FormatVue()
-function FormatVue()
-    " (1) - prettier fmt via Vetur config
-    lua vim.lsp.buf.formatting_sync(nil, 1000)
-    " (2) - eslint --fix
-    FormatWrite
-endfunction
 
-augroup Format
-    autocmd!
-    autocmd BufWritePre *.js FormatWrite
+" Prettier doesn't support mixed HTML/PHP so we just use this instead
+nnoremap <silent> <leader>fs <cmd>lua vim.lsp.buf.formatting_sync(nil, 1000)<CR>:w<CR>
+nnoremap <silent> <leader>fw :FormatWrite<CR>:w<CR>
+
+" TODO: move to ftplugin
+" TODO: find *.md formatter
+augroup FileTypeTextwidth
+	autocmd!
+	autocmd FileType markdown set textwidth=80
 augroup END
 
 lua <<EOF
-    require "format".setup {
-        ["*"] = {
-            { cmd = {"sed -i 's/[ \t]*$//'"} } -- remove trailing whitespace
-        },
-        vue = {
-            { cmd = { "./node_modules/.bin/eslint --fix" } }
-        },
-        javascript = {
-            { cmd = {"prettier -w"} }
-        },
+    local filetypes = {}
+    local prettier_filetypes = {
+        'javascript',
+        'typescript',
+        'scss',
+        'css',
+        'html',
     }
+    local prettier_formatter = function()
+        return {
+            exe = "prettier",
+            args = {
+                '--stdin-filepath',
+                vim.api.nvim_buf_get_name(0),
+            },
+            stdin = true
+        }
+    end
+    
+    for i, ft in ipairs(prettier_filetypes) do
+        filetypes[ft] = { prettier_formatter }
+    end
+
+    require('formatter').setup({
+        logging = false,
+        filetype = filetypes
+    })
 EOF
 
-" ==============================================================================
+augroup VueFmt
+	autocmd!
+    autocmd BufWritePre *.vue lua vim.lsp.buf.formatting_sync(nil, 1000)
+    " autocmd BufWritePre *.vue lua vim.lsp.buf.formatting_seq_sync()
+    " autocmd BufWritePost *.vue lua vim.lsp.buf.formatting()
+augroup END
+
+augroup WebFmt
+    autocmd!
+    autocmd BufWritePre *.js,*.ts,*.html FormatWrite
+augroup END
+
 " Syntax
+" ==============================================================================
 
 " Native Vim embedded syntax highlighting
 let g:vimsyn_embed = 'l'
@@ -509,8 +784,8 @@ let g:javascript_plugin_flow = 1
 " Options: ['detect_on_enter', 'scss', []]
 let g:vue_pre_processors = ['scss']
 
-" ==============================================================================
 " Markdown
+" ==============================================================================
 
 let g:markdown_fenced_languages = [
     \  'html', 'css', 'sass', 'scss', 'javascript', 'js=javascript',
@@ -524,14 +799,15 @@ let g:vim_json_syntax_conceal = 0
 let g:vim_markdown_conceal = 0
 let g:vim_markdown_conceal_code_blocks = 0
 
-" ==============================================================================
 " FZF
+" ==============================================================================
 "
-" <M-j> down
-" <M-k> up
+" <C-p> up
+" <C-n> down
+" <Tab> select/deselect
 
 let g:fzf_preview_window = 'right:40%'
-let g:fzf_layout = { 'window': { 'width': 0.8, 'height': 0.6, 'yoffset': 0.85 } }
+let g:fzf_layout = { 'window': { 'width': 0.8, 'height': 0.7, 'yoffset': 0.7 } }
 
 nnoremap <silent> <Leader>d     :Buffers<CR>
 nnoremap <silent> <Leader>bd    :BufMultiDel<CR>
@@ -544,8 +820,8 @@ if has('nvim') && !exists('g:fzf_layout')
     \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
 endif
 
-" ==============================================================================
 " FZF - Custom Commands
+" ==============================================================================
 
 " Cmd override [:Buffers]
 command! -bang -nargs=0 Buffers
@@ -561,138 +837,104 @@ command! -bang -nargs=0 Buffers
 
 " Cmd override [:Files]
 command! -bang -nargs=? -complete=dir Files
-  \ call fzf#vim#files($HOME, {
+  \ call fzf#vim#files(empty(<q-args>) ? $HOME : <q-args>, {
   \   'options': [
-  \     '--prompt', "Files: [HOME]: ",
+  \     '--prompt', empty(<q-args>) ? "Files: ~/ " : fnamemodify(<q-args>, ':p:~') . ' ',
   \     '--reverse',
   \     '--inline-info',
   \   ]
   \ }, <bang>0)
 
-" ==============================================================================
 " FZF - Files command generator
-" project array = g:tbl_projects[] (defined in my custom plugin
-" ~/.config/nvim/plugin/myplugin.vim)
-
-" (1) - `Project` command with custom directory `n` as arg
+" ==============================================================================
+" g:tbl_projects - defined in my custom plugin @ ~/.config/nvim/plugin/user.vim
 "
-" :Project 0 (primary)
-" :Project 1 (addt'l)
-" :Project n (addt'l ...n)
+" :Project main
+" :Project 1
+" :Project 2
+" :Project N
 
-command! -bang -nargs=1 Project
-  \ call fzf#vim#files(g:tbl_projects[<q-args>]['path'], {
-  \   'options': [
-  \     '--prompt', '[Files > '. g:tbl_projects[<q-args>]['label'] .']: ',
-  \     '--reverse',
-  \     '--inline-info',
-  \   ]
-  \ }, <bang>0)
+command! -nargs=* -bang -complete=dir Project call OpenProjectFile(<q-args>, <bang>0)
+command! -nargs=* -bang -complete=dir ProjectContents call SearchFileContents(<bang>0, <f-args>)
 
-function s:FZFDefineFilesCmd() abort
-    for i in range(0, len(g:tbl_projects))
-        if (i == 0) 
-            " index 0 = HOME - so we skip it
-            continue
-        elseif (i == 1)
-            " index 1 = PRIMARY so we map it to <C-p>
-            execute 'nnoremap <silent> <C-p> :Project ' . i . '<CR>'
-        else
-            " Map reference projects to <Leader>p{n}
-            execute 'nnoremap <silent> <Leader>p'. (i-1) .' :Project '. (i-1) .'<CR>'
-        endif
-    endfor
+function! OpenProjectFile(project, fullscreen)
+    let path = g:tbl_projects[a:project]['path']
+    let label = g:tbl_projects[a:project]['label']
+    let ignore = g:tbl_projects[a:project]['ignore']
+
+    let rg_path = '--files --hidden ' .path
+    let rg_ignore = '--glob ' .ignore
+    let rg_args = rg_ignore. ' ' .rg_path
+
+    let command_fmt = 'rg --no-require-git ' .rg_args. ' -- %s || true'
+    " TODO: use path as shellescape param
+    let initial_command = printf(command_fmt, shellescape(a:project))
+    let reload_command = printf(command_fmt, '{q}')
+
+    let spec = {
+        \ 'source': initial_command,
+        \ 'dir': path,
+        \ 'options': [
+        \   '--with-nth', '-3..',
+        \   '--reverse',
+        \   '--inline-info',
+        \   '--prompt', path. ' ',
+        \   '--bind', 'change:reload:'.reload_command
+        \ ]}
+
+    call fzf#run(fzf#wrap(spec), a:fullscreen)
 endfunction
 
-" (2) - Generate remaps on enter
-augroup FZFFilesCmd
-    autocmd!
-    " autocmd VimEnter * call s:FZFDefineFilesCmd() | call s:MapRgFileContents()
-    autocmd VimEnter * call s:FZFDefineFilesCmd() 
-augroup END
+function! SearchFileContents(fullscreen, project, k='') abort
+    let path = g:tbl_projects[a:project]['path']
+    let label = g:tbl_projects[a:project]['label']
+    let ignore = g:tbl_projects[a:project]['ignore']
+    let search_keyword = empty(a:k) ? '' : a:k
 
-" function! s:FZFCommands() abort
-"     s:FZFDefineFilesCmd()
-"     s:MapRgFileContents()
-" endfunction
+    let rg_ignore = '-g ' . ignore
+    let rg_command = 'rg --column --line-number --no-heading --color=always --smart-case --hidden ' .rg_ignore. ' -- %s || true'
 
-" FZF RG2
+    let initial_command = printf(rg_command, shellescape(search_keyword))
+    let reload_command = printf(rg_command, '{q}')
+    echom initial_command
 
-command! -bang -nargs=? RgFileContents
-    \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case -g ". g:tbl_projects[<args>[0]]['ignore'] .' '.shellescape(<args>[1]), 1, {
-    \   'dir': g:tbl_projects[<args>[0]]['path'],
-    \   'options': ['--reverse', '--inline-info', '--height', '20%']
-    \ }, <bang>0)
+    let spec = {
+        \ 'source': initial_command,
+        \ 'dir': path,
+        \ 'options': [
+        \   '--reverse',
+        \   '--inline-info',
+        \   '--prompt', path. ' ',
+        \   '--query', search_keyword,
+        \   '--bind', 'change:reload:'.reload_command
+        \ ]}
 
-function! s:MapRgFileContents() abort
-    for i in range(0, len(g:tbl_projects) - 1)
-        if (i == 0) 
-            " index 0 = HOME - so we skip it
-            execute 'nnoremap <silent> <Leader>rh :RgFileContents [' . i . ', ""]'
-            execute 'vnoremap <silent> <Leader>rh y \| :RgFileContents [' . i . ', "<C-r>""]'
-        elseif (i == 1)
-            " index 1 = PRIMARY so we map it to <C-p>
-            execute 'nnoremap <silent> <C-p> :Project ' . (i-1) . '<CR>'
-        else
-            " Map reference projects to <Leader>p{n}
-            execute 'nnoremap <silent> <Leader>p' . (i-1) . ' :Project ' . (i-1) . '<CR>'
-        endif
-    endfor
+    call fzf#vim#grep(initial_command, 1, fzf#vim#with_preview(spec), a:fullscreen)
 endfunction
 
-" ==============================================================================
-" FZF - search files contents (via ripgrep)
 
-nnoremap <Leader>rp :RgProjectContents
-vnoremap <Leader>rp y \| :RgProjectContents <C-r>"
-nnoremap <Leader>rh :RgFileContentsHome
-vnoremap <Leader>rh y \| :RgFileContentsHome <C-r>"
+" TODO: Find 'DRY'er solution to this remap
 
-" File Contents => Project [project_root]
-command! -bang -nargs=* RgProjectContents
-    \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case -g " .g:user_proj_ign_0. ' '.shellescape(<q-args>), 1, {
-    \   'dir': g:user_proj_0,
-    \   'options': ['--reverse', '--inline-info', '--height', '20%']
-    \ }, <bang>0)
+nnoremap <Leader>rh :ProjectContents home<CR>
+vnoremap <Leader>rh y \| :ProjectContents home <C-r>=escape('<C-r>"', ' \{}[]()')<CR>
 
-" File Contents => Home [home]
-command! -bang -nargs=* RgFileContentsHome
-    \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case --hidden -g " .g:user_home_ign. ' '.shellescape(<q-args>), 1, {
-    \   'dir': '~',
-    \   'options': ['--reverse', '--inline-info']
-    \ }, <bang>0)
+nnoremap <Leader>r1 :ProjectContents nest<CR>
+vnoremap <Leader>r1 y \| :ProjectContents nest <C-r>=escape('<C-r>"', ' \{}[]()')<CR>
 
-" ==============================================================================
-" FZF - Search file contents - custom projects
+nnoremap <Leader>r2 :ProjectContents tsreddit<CR>
+vnoremap <Leader>r2 y \| :ProjectContents tsreddit <C-r>=escape('<C-r>"', ' \{}[]()')<CR>
 
-nnoremap <Leader>r1 :RgProjectContents1
-vnoremap <Leader>r1 y \| :RgProjectContents1 <C-r>"
-nnoremap <Leader>r2 :RgProjectContents2
-vnoremap <Leader>r2 y \| :RgProjectContents2 <C-r>"
-nnoremap <Leader>r3 :RgProjectContents3
-vnoremap <Leader>r3 y \| :RgProjectContents3 <C-r>"
+nnoremap <Leader>r3 :ProjectContents ergonode<CR>
+vnoremap <Leader>r3 y \| :ProjectContents ergonode <C-r>=escape('<C-r>"', ' \{}[]()')<CR>
 
-command! -bang -nargs=* RgProjectContents1
-    \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case -g " .g:user_proj_ign_1. ' '.shellescape(<q-args>), 1, {
-    \   'dir': g:user_proj_1,
-    \   'options': ['--reverse', '--inline-info', '--height', '20%']
-    \ }, <bang>0)
+nnoremap <Leader>r4 :ProjectContents directus<CR>
+vnoremap <Leader>r4 y \| :ProjectContents directus <C-r>=escape('<C-r>"', ' \{}[]()')<CR>
 
-command! -bang -nargs=* RgProjectContents2
-    \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case -g " .g:user_proj_ign_2. ' '.shellescape(<q-args>), 1, {
-    \   'dir': g:user_proj_2,
-    \   'options': ['--reverse', '--inline-info', '--height', '20%']
-    \ }, <bang>0)
+" <C-r><C-r>a
+let @b='"Vim''s quote handling is a little tricky"'
 
-command! -bang -nargs=* RgProjectContents3
-    \ call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case -g " .g:user_proj_ign_3. ' '.shellescape(<q-args>), 1, {
-    \   'dir': g:user_proj_3,
-    \   'options': ['--reverse', '--inline-info', '--height', '20%']
-    \ }, <bang>0)
-
-" ==============================================================================
 " FZF - Delete Buffers
-"
+" ==============================================================================
 " <Tab> to select
 " <CR>  to confirm / delete
 
@@ -720,8 +962,8 @@ function! s:delete_buffers(lines)
     execute 'bwipeout' join(map(a:lines, {_, line -> split(line)[0]}))
 endfunction
 
-" ==============================================================================
 " Quick Search - star(*)
+" ==============================================================================
 
 " Search visually selected (without jump using vim-visual-star-search)
 nnoremap <silent> <C-f> viw:<C-u>call <SID>VSetSearch('/')<CR>:set hls<CR><Esc>
@@ -750,5 +992,14 @@ endif
 if maparg('<leader>*', 'v') == ''
   vmap <leader>* :<C-u>call <SID>VSetSearch()<CR>:execute 'noautocmd vimgrep /' . @/ . '/ **'<CR>
 endif
+
+" Insert date/time
+nnoremap <F5> "=strftime("%c")<CR>p
+inoremap <F5> <C-R>=strftime("%c")<CR>
+
+" Rename symbol (YMMV on LSP support)
+nnoremap <F2> <cmd>lua vim.lsp.buf.rename()<CR>
+
+
 
 " EOF
