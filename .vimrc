@@ -180,9 +180,10 @@ Plug 'tpope/vim-fugitive'
 
 " UI
 Plug 'itchyny/lightline.vim'
-Plug 'lukas-reineke/indent-blankline.nvim', {'branch': 'lua' }
+Plug 'lukas-reineke/indent-blankline.nvim'
 
 " Colorschemes
+Plug 'norcalli/nvim-colorizer.lua'
 Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'drewtempelmeyer/palenight.vim'
 Plug 'arcticicestudio/nord-vim'
@@ -218,48 +219,47 @@ augroup END
 
 function! HLOverride() abort
     " Common Groups
-    " hi Normal                   guibg=NONE ctermbg=NONE
-    " hi SignColumn               guibg=NONE ctermbg=NONE
-    " hi LineNr                   guibg=NONE ctermbg=NONE
-    " hi CursorLineNr             guibg=NONE ctermbg=NONE
-    " hi EndOfBuffer              guibg=NONE ctermbg=NONE
+    " hi Normal                                 guibg=NONE ctermbg=NONE
+    " hi SignColumn                             guibg=NONE ctermbg=NONE
+    " hi LineNr                                 guibg=NONE ctermbg=NONE
+    " hi CursorLineNr                           guibg=NONE ctermbg=NONE
+    " hi EndOfBuffer                            guibg=NONE ctermbg=NONE
 
     " UI
     " IndentLine: neutral-grey,
     " LineNr: [#6272A4, #676E95, #595E7B] }
-    " hi IndentBlanklineChar      guifg=#424450 ctermfg=238
-    hi CursorLineNr             guifg=#c0caf5 ctermfg=0
-    hi LineNr                   guifg=#595E7B
+    " hi IndentBlanklineChar                    guifg=#424450 ctermfg=238
+    hi CursorLineNr                             guifg=#c0caf5 ctermfg=0
+    hi LineNr                                   guifg=#595E7B
     
-
     " Material - palenight
     " Markdown: { green: #1abc9c, yellowTan: #ecc48d, purple: #AB47BC }
-    hi Normal                   guifg=#c9d1d9
-    hi markdownCode             guifg=#ecc48d
-    hi markdownCodeDelimiter    guifg=#ecc48d
-    hi link markdownListMarker  Comment
+    hi Normal                                   guifg=#c9d1d9
+    hi markdownCode                             guifg=#ecc48d
+    hi markdownCodeDelimiter                    guifg=#ecc48d
+    hi link markdownListMarker                  Comment
 
     " Dracula
-    " hi Todo                     cterm=bold guifg=#8BE9FD guibg=none gui=bold term=bold
+    " hi Todo                                   cterm=bold guifg=#8BE9FD guibg=none gui=bold term=bold
 
     " TokyoNight
-    " hi Todo                     guibg=NONE ctermbg=NONE guifg=#e0af68 ctermfg=11 gui=bold term=bold
-    " hi link ALEWarningSign      Todo
-    " hi link ALEStyleWarningSign Todo
+    " hi Todo                                   guibg=NONE ctermbg=NONE guifg=#e0af68 ctermfg=11 gui=bold term=bold
+    " hi link ALEWarningSign                    Todo
+    " hi link ALEStyleWarningSign               Todo
 
     " Embark
-    " hi Todo                                 guibg=NONE ctermbg=NONE 
-    " hi GitGutterAdd                         guibg=NONE ctermbg=NONE 
-    " hi GitGutterDelete                      guibg=NONE ctermbg=NONE 
-    " hi GitGutterChange                      guibg=NONE ctermbg=NONE 
-    " hi GitGutterChangeDelete                guibg=NONE ctermbg=NONE 
-    " hi ALEErrorSign                         guibg=NONE ctermbg=NONE 
-    " hi ALEWarningSign                       guibg=NONE ctermbg=NONE 
-    " hi LspDiagnosticsDefaultHint            guibg=NONE ctermbg=NONE
-    " hi LspDiagnosticsDefaultError           guibg=NONE ctermbg=NONE
-    " hi LspDiagnosticsDefaultWarning         guibg=NONE ctermbg=NONE
-    " hi LspDiagnosticsDefaultInformation     guibg=NONE ctermbg=NONE
-    " hi LineNr                               guifg=#6272A4 ctermfg=61 
+    " hi Todo                                   guibg=NONE ctermbg=NONE 
+    " hi GitGutterAdd                           guibg=NONE ctermbg=NONE 
+    " hi GitGutterDelete                        guibg=NONE ctermbg=NONE 
+    " hi GitGutterChange                        guibg=NONE ctermbg=NONE 
+    " hi GitGutterChangeDelete                  guibg=NONE ctermbg=NONE 
+    " hi ALEErrorSign                           guibg=NONE ctermbg=NONE 
+    " hi ALEWarningSign                         guibg=NONE ctermbg=NONE 
+    " hi LspDiagnosticsDefaultHint              guibg=NONE ctermbg=NONE
+    " hi LspDiagnosticsDefaultError             guibg=NONE ctermbg=NONE
+    " hi LspDiagnosticsDefaultWarning           guibg=NONE ctermbg=NONE
+    " hi LspDiagnosticsDefaultInformation       guibg=NONE ctermbg=NONE
+    " hi LineNr                                 guifg=#6272A4 ctermfg=61 
 endfunction
 
 " Theme: Palenight
@@ -364,6 +364,15 @@ inoremap <silent><expr> <C-d>   compe#scroll({ 'delta': -4 })
 
 lua <<EOF
 
+    -- Colorizer
+
+    require 'colorizer'.setup {
+        'scss';
+        'css';
+        'javascript';
+        'vim';
+    }
+
     -- QuickFix List
 
     do
@@ -396,19 +405,29 @@ lua <<EOF
         preselect = 'always';
         throttle_time = 80;
         source_timeout = 200;
+        resolve_timeout = 800;
         incomplete_delay = 400;
         max_abbr_width = 100;
         max_kind_width = 100;
         max_menu_width = 100;
-        documentation = true;
+        documentation = {
+          border = { '', '' ,'', ' ', '', '', '', ' ' }, -- the border option is the same as `|help nvim_open_win|`
+          winhighlight = "NormalFloat:CompeDocumentation,FloatBorder:CompeDocumentationBorder",
+          max_width = 120,
+          min_width = 60,
+          max_height = math.floor(vim.o.lines * 0.3),
+          min_height = 1,
+        };
 
         source = {
-            path = true;
-            buffer = true;
-            calc = true;
-            nvim_lsp = true;
-            nvim_lua = true;
-            vsnip = true;
+          path = true;
+          buffer = true;
+          calc = true;
+          nvim_lsp = true;
+          nvim_lua = true;
+          vsnip = true;
+          ultisnips = true;
+          luasnip = true;
         };
     }
 
@@ -505,7 +524,7 @@ lua <<EOF
             -- disable = { 'scss' }
         },
         indent = {
-            enable = false
+            enable = true
         },
         autotag = {
             enable = true,
@@ -546,9 +565,6 @@ lua <<EOF
 
     lsp.tsserver.setup {
         capabilities = capabilities,
-        settings = {
-            documentFormatting = true
-        }
     }
 
     lsp.vimls.setup {
@@ -558,14 +574,22 @@ lua <<EOF
     lsp.vuels.setup {
         on_attach = function(client)
             --[[
-                Internal Vetur formatting is not supported out of the box
+                # Enable Vetur's special *.vue formatter
 
                 This line below is required if you:
-                    - want to format using Nvim's native `vim.lsp.buf.formatting**()`
-                    - want to use Vetur's formatting config instead, e.g, settings.vetur.format {...}
+                - want to format using Nvim's native `vim.lsp.buf.formatting**()`
+                - want to use Vetur's formatting config in `settings.vetur.format {...}`
+                - want to defer to eslint(_d) to fix only the <template> using eslint-fix
             --]]
             client.resolved_capabilities.document_formatting = true
-            on_attach(client)
+
+            -- TODO: fix sync blocking on format
+            vim.api.nvim_exec([[
+                augroup VueFmt
+                    autocmd!
+                    autocmd BufWritePre *.vue lua vim.lsp.buf.formatting_sync(nil, 1000)
+                augroup END
+            ]], true)
         end,
         capabilities = capabilities,
         settings = {
@@ -756,13 +780,6 @@ lua <<EOF
         filetype = filetypes
     })
 EOF
-
-augroup VueFmt
-	autocmd!
-    autocmd BufWritePre *.vue lua vim.lsp.buf.formatting_sync(nil, 1000)
-    " autocmd BufWritePre *.vue lua vim.lsp.buf.formatting_seq_sync()
-    " autocmd BufWritePost *.vue lua vim.lsp.buf.formatting()
-augroup END
 
 augroup WebFmt
     autocmd!
