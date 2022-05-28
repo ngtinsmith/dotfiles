@@ -64,19 +64,6 @@ nmap <C-_> <Plug>CommentaryLine
 " Retain "p" register when pasting over a selection
 vnoremap <leader>p "_dP
 
-" Quickfix List
-function! ToggleQuickFix()
-    if empty(filter(getwininfo(), 'v:val.quickfix'))
-        copen 50
-    else
-        cclose
-    endif
-endfunction
-
-nnoremap <silent> <leader>q :call ToggleQuickFix()<CR>
-nnoremap <silent> <C-j> :cprev<CR>
-nnoremap <silent> <C-k> :cnext<CR>
-
 " Quick vimrc refresh
 nnoremap <Leader>sv :so ~/.vimrc<CR> <BAR> :echom '~/.vimrc reloaded'<CR>
 
@@ -101,6 +88,7 @@ set fillchars=vert:▏
 set expandtab
 set smarttab
 set tabstop=4
+set softtabstop=4
 set shiftwidth=4
 set softtabstop=0
 
@@ -141,6 +129,7 @@ filetype plugin indent on
 " Plugins
 " ==============================================================================
 
+" if !exists('g:vscode')
 call plug#begin('~/.vim/plugged')
 
 " Session
@@ -152,9 +141,17 @@ Plug 'junegunn/fzf.vim'
 Plug 'vifm/vifm.vim'
 
 " Completion and Linting
-Plug 'dense-analysis/ale'
 Plug 'neovim/nvim-lspconfig'
-Plug 'hrsh7th/nvim-compe'
+Plug 'nvim-lua/plenary.nvim'
+Plug 'jose-elias-alvarez/null-ls.nvim' 
+" Plug 'hrsh7th/nvim-compe'
+
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-path'
+Plug 'hrsh7th/cmp-cmdline'
+Plug 'hrsh7th/cmp-vsnip'
+Plug 'hrsh7th/nvim-cmp'
 
 " Snippets
 Plug 'honza/vim-snippets'
@@ -164,15 +161,9 @@ Plug 'hrsh7th/vim-vsnip'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'nvim-treesitter/playground'
 
-" Helpers
-Plug 'tpope/vim-surround'
-Plug 'tpope/vim-commentary'
-Plug 'windwp/nvim-autopairs'
-Plug 'windwp/nvim-ts-autotag'
-
-" Format
-Plug 'lukas-reineke/format.nvim'
-Plug 'mhartington/formatter.nvim'
+" Diagnostics
+Plug 'kyazdani42/nvim-web-devicons'
+Plug 'folke/trouble.nvim'
 
 " Git
 Plug 'airblade/vim-gitgutter'
@@ -198,7 +189,14 @@ Plug 'marko-cerovac/material.nvim'
 Plug 'shaunsingh/moonlight.nvim'
 Plug 'arzg/vim-substrata'
 
+" Helpers
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-commentary'
+Plug 'windwp/nvim-autopairs'
+Plug 'windwp/nvim-ts-autotag'
+
 call plug#end()
+" endif
 
 " Themes - Colorschemes
 " ==============================================================================
@@ -280,7 +278,10 @@ let g:material_custom_colors = { 'accent': '#c9d1d9' }
 " Colorschemes: [
 "   palenight, dracula, moonfly, nightfly, material
 "   nord, onedark, embark, OceanicNext, tokyonight, substrata ]
-colorscheme material
+
+if !exists('g:vscode')
+    colorscheme material
+endif
 
 " Themes - Statusline
 " ==============================================================================
@@ -360,8 +361,6 @@ inoremap <silent><expr> <CR>    compe#confirm('<CR>')
 inoremap <silent><expr> <C-f>   compe#scroll({ 'delta': +4 })
 inoremap <silent><expr> <C-d>   compe#scroll({ 'delta': -4 })
 
-" TODO organize as lua conf
-
 lua <<EOF
 
     -- Colorizer
@@ -373,111 +372,92 @@ lua <<EOF
         'vim';
     }
 
-    -- QuickFix List
+    local cmp = require'cmp'
 
-    do
-        local method = "textDocument/publishDiagnostics"
-        local default_handler = vim.lsp.handlers[method]
-        vim.lsp.handlers[method] = function(err, method, result, client_id, bufnr, config)
-            default_handler(err, method, result, client_id, bufnr, config)
-            local diagnostics = vim.lsp.diagnostic.get_all()
-            local qflist = {}
-            for bufnr, diagnostic in pairs(diagnostics) do
-                for _, d in ipairs(diagnostic) do
-                  d.bufnr = bufnr
-                  d.lnum = d.range.start.line + 1
-                  d.col = d.range.start.character + 1
-                  d.text = d.message
-                  table.insert(qflist, d)
+    cmp.setup({
+        snippet = {
+            -- REQUIRED - you must specify a snippet engine
+            expand = function(args)
+                vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+                -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+                -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
+                -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+            end,
+        },
+        mapping = {
+            ['<C-b>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
+            ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
+            ['<C-e>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
+            ['<C-y>'] = cmp.config.disable, -- Specify `cmp.config.disable` if you want to remove the default `<C-y>` mapping.
+            -- ['<C-e>'] = cmp.mapping({
+            --     i = cmp.mapping.abort(),
+            --     c = cmp.mapping.close(),
+            -- }),
+            ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+            ['<Tab>'] = cmp.mapping(function(fallback)
+                if cmp.visible() then
+                    cmp.select_next_item()
+                elseif vim.fn["vsnip#available"](1) == 1 then
+                    vim.fn.feedkeys(t('<Plug>(vsnip-expand-or-jump)', ''))
+                else
+                    fallback()
                 end
-            end
-            vim.lsp.util.set_qflist(qflist)
-        end
-    end
+            end, {
+              "i",
+              "s"
+            }),
+            ['<S-Tab>'] = function(fallback)
+                if cmp.visible() then
+                    cmp.select_prev_item()
+                elseif vim.fn["vsnip#jumpable"](-1) then
+                    vim.fn.feedkeys(t('<Plug>(vsnip-jump-prev)', ''))
+                else
+                    fallback()
+                end
+            end,
+        },
+        sources = cmp.config.sources({
+            { name = 'nvim_lsp' },
+            { name = 'vsnip' }, -- For vsnip users.
+            -- { name = 'luasnip' }, -- For luasnip users.
+            -- { name = 'ultisnips' }, -- For ultisnips users.
+            -- { name = 'snippy' }, -- For snippy users.
+        }, {
+           { name = 'buffer' },
+        })
+    })
 
-    -- Completion (compe)
+    -- Set configuration for specific filetype.
+    cmp.setup.filetype('gitcommit', {
+        sources = cmp.config.sources({
+            { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it. 
+        }, {
+            { name = 'buffer' },
+        })
+    })
 
-    require'compe'.setup {
-        enabled = true;
-        autocomplete = true;
-        debug = false;
-        min_length = 1;
-        preselect = 'always';
-        throttle_time = 80;
-        source_timeout = 200;
-        resolve_timeout = 800;
-        incomplete_delay = 400;
-        max_abbr_width = 100;
-        max_kind_width = 100;
-        max_menu_width = 100;
-        documentation = {
-          border = { '', '' ,'', ' ', '', '', '', ' ' }, -- the border option is the same as `|help nvim_open_win|`
-          winhighlight = "NormalFloat:CompeDocumentation,FloatBorder:CompeDocumentationBorder",
-          max_width = 120,
-          min_width = 60,
-          max_height = math.floor(vim.o.lines * 0.3),
-          min_height = 1,
-        };
+    -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
+    cmp.setup.cmdline('/', {
+        sources = {
+            { name = 'buffer' }
+        }
+    })
 
-        source = {
-          path = true;
-          buffer = true;
-          calc = true;
-          nvim_lsp = true;
-          nvim_lua = true;
-          vsnip = true;
-          ultisnips = true;
-          luasnip = true;
-        };
-    }
+    -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+    cmp.setup.cmdline(':', {
+        sources = cmp.config.sources({
+            { name = 'path' }
+        }, {
+            { name = 'cmdline' }
+        })
+    })
 
-    -- Use (s-)tab to:
-    --- move to prev/next item in completion menuone
-    --- jump to prev/next snippet's placeholder
+    -- Setup CMP lspconfig
 
-    local t = function(str)
-        return vim.api.nvim_replace_termcodes(str, true, true, true)
-    end
-
-    local check_back_space = function()
-        local col = vim.fn.col('.') - 1
-        if col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') then
-            return true
-        else
-            return false
-        end
-    end
-
-    _G.tab_complete = function()
-        if vim.fn.pumvisible() == 1 then
-            return t "<C-n>"
-        elseif vim.fn.call("vsnip#available", {1}) == 1 then
-            return t "<Plug>(vsnip-expand-or-jump)"
-        elseif check_back_space() then
-            return t "<Tab>"
-        else
-            return vim.fn['compe#complete']()
-        end
-    end
-
-    _G.s_tab_complete = function()
-        if vim.fn.pumvisible() == 1 then
-            return t "<C-p>"
-        elseif vim.fn.call("vsnip#jumpable", {-1}) == 1 then
-            return t "<Plug>(vsnip-jump-prev)"
-        else
-            return t "<S-Tab>"
-        end
-    end
-
-    vim.api.nvim_set_keymap("i", "<Tab>", "v:lua.tab_complete()", {expr = true})
-    vim.api.nvim_set_keymap("s", "<Tab>", "v:lua.tab_complete()", {expr = true})
-    vim.api.nvim_set_keymap("i", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
-    vim.api.nvim_set_keymap("s", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
+    local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 
     -- LSP Snippets
 
-    local capabilities = vim.lsp.protocol.make_client_capabilities()
     capabilities.textDocument.completion.completionItem.snippetSupport = true
     capabilities.textDocument.completion.completionItem.resolveSupport = {
         properties = {
@@ -492,24 +472,6 @@ lua <<EOF
     require('nvim-autopairs').setup()
     local remap = vim.api.nvim_set_keymap
     local npairs = require('nvim-autopairs')
-
-    -- skip it, if you use another global object
-    _G.MUtils= {}
-
-    vim.g.completion_confirm_key = ""
-    MUtils.completion_confirm=function()
-        if vim.fn.pumvisible() ~= 0  then
-            if vim.fn.complete_info()["selected"] ~= -1 then
-                return vim.fn["compe#confirm"](npairs.esc("<cr>"))
-            else
-                return npairs.esc("<cr>")
-            end
-        else
-            return npairs.autopairs_cr()
-        end
-    end
-
-    remap('i' , '<CR>','v:lua.MUtils.completion_confirm()', {expr = true , noremap = true})
 
     -- Treesitter
 
@@ -554,10 +516,113 @@ lua <<EOF
         },
     }
 
+    -- Diagnostics :: Native
+
+    vim.diagnostic.config({
+        float = {
+            focusable = false,
+            prefix = function(diagnostic)
+                if diagnostic.code ~= nil then
+                    return string.format('(%s) ', type(diagnostic.code) == 'number'
+                        and diagnostic.source
+                        or diagnostic.code
+                    )
+                else 
+                    return string.format('(%s) ', diagnostic.source)
+                end
+            end
+        }
+    })
+
+    vim.o.updatetime = 300
+    vim.api.nvim_create_autocmd('CursorHold', {
+        desc = 'Show floating inline diagnostic',
+        callback = function()
+            vim.diagnostic.open_float()
+        end
+    })
+
+    local signs = { Error = "■ ", Warn = "● ", Hint = "● ", Info = "ⓘ " }
+
+    for type, icon in pairs(signs) do
+      local hl = "DiagnosticSign" .. type
+      vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+    end
+    -- Diagnostics :: Trouble.nvim
+
+    require("trouble").setup {
+        -- your configuration comes here
+        -- or leave it empty to use the default settings
+        -- refer to the configuration section below
+    }
+
+    vim.api.nvim_set_keymap("n", "<leader>q", "<cmd>Trouble<cr>",
+      {silent = true, noremap = true}
+    )
+
+    -- [Linting, Formatting] :: Null-ls
+
+    local nls = require('null-ls')
+    local nls_formatting = nls.builtins.formatting
+    local nls_diagnostics = nls.builtins.diagnostics
+
+    nls.setup({
+        debug = true,
+        on_attach = function(client)
+            if client.resolved_capabilities.document_formatting then
+
+                vim.api.nvim_create_augroup('lsp_formatting', {})
+
+                vim.api.nvim_create_autocmd('BufWritePre', {
+                    desc = 'Auto-format current buffer on (before) save',
+                    group = 'lsp_formatting',
+                    callback = function()
+                        vim.lsp.buf.formatting_sync(nil, 1000)
+                    end
+                })
+            end
+        end,
+        sources = {
+            nls_formatting.prettierd.with({
+                disabled_filetypes = { "markdown" },
+            }),
+            nls_diagnostics.eslint_d,
+        },
+    })
+
+    vim.api.nvim_set_keymap("n", "<leader>fe", "mF:%!eslint_d --stdin --fix-to-stdout<CR>`F",
+      {noremap = true, silent = true}
+    )
+    vim.api.nvim_set_keymap("v", "<leader>fe", ":!eslint_d --stdin --fix-to-stdout<CR>gv",
+      {noremap = true, silent = true}
+    )
+
     -- LSP
 
     local lsp = require'lspconfig'
-    local util = require 'lspconfig/util'
+    local util = require'lspconfig/util'
+
+    -- TODO: fix on_attach highlight for JSON
+    -- temporary fix: exclude `*.stories.ts` in tsconfig.json
+    -- @see volar #568
+
+    vim.api.nvim_create_augroup('lsp_document_highlight', {})
+
+    vim.api.nvim_create_autocmd('CursorHold', {
+        desc = 'LSP highlight symbol / references in view',
+        group = 'lsp_document_highlight',
+        callback = function()
+            vim.lsp.buf.document_highlight()
+        end
+    })
+
+    vim.api.nvim_create_autocmd('CursorMoved', {
+        desc = 'LSP clear symbol / references highlight in view',
+        group = 'lsp_document_highlight',
+        callback = function()
+            vim.lsp.buf.clear_references()
+        end
+    })
 
     lsp.cssls.setup {
         capabilities = capabilities,
@@ -565,59 +630,96 @@ lua <<EOF
 
     lsp.tsserver.setup {
         capabilities = capabilities,
+        on_attach = function(client)
+            -- use null-ls instead
+            client.resolved_capabilities.document_formatting = false
+        end
     }
 
     lsp.vimls.setup {
         capabilities = capabilities,
     }
 
-    lsp.vuels.setup {
-        on_attach = function(client)
-            --[[
-                # Enable Vetur's special *.vue formatter
+    local v_get_typescript_server_path = function(root_dir)
+        local project_root = util.find_node_modules_ancestor(root_dir)
 
-                This line below is required if you:
-                - want to format using Nvim's native `vim.lsp.buf.formatting**()`
-                - want to use Vetur's formatting config in `settings.vetur.format {...}`
-                - want to defer to eslint(_d) to fix only the <template> using eslint-fix
-            --]]
-            client.resolved_capabilities.document_formatting = true
+        local local_tsserverlib = project_root ~= nil and util.path.join(project_root, 'node_modules', 'typescript', 'lib', 'tsserverlibrary.js')
+        local global_tsserverlib = '/home/ng/.nvm/versions/node/v16.14.0/lib/node_modules/typescript/lib/tsserverlibrary.js'
 
-            -- TODO: fix sync blocking on format
-            vim.api.nvim_exec([[
-                augroup VueFmt
-                    autocmd!
-                    autocmd BufWritePre *.vue lua vim.lsp.buf.formatting_sync(nil, 1000)
-                augroup END
-            ]], true)
-        end,
-        capabilities = capabilities,
-        settings = {
-            vetur = {
+        if local_tsserverlib and util.path.exists(local_tsserverlib) then
+            return local_tsserverlib
+        else
+            return global_tsserverlib
+        end
+    end
+
+    local v_on_new_config = function(new_config, new_root_dir)
+        if
+            new_config.init_options
+            and new_config.init_options.typescript
+            and new_config.init_options.typescript.serverPath == ''
+        then
+            new_config.init_options.typescript.serverPath = v_get_typescript_server_path(new_root_dir)
+        end
+    end
+
+    local v_on_attach = function(client)
+        -- use null-ls formatter instead
+        client.resolved_capabilities.document_formatting = false
+        client.resolved_capabilities.document_range_formatting = false
+    end
+
+    lsp.volar.setup {
+        cmd = { "volar-server", "--stdio" },
+        on_attach = v_on_attach,
+        filetypes = { 'vue' },
+        init_options = {
+            languageFeatures = {
+                callHierarchy = true,
+                codeAction = true,
+                codeLens = true,
                 completion = {
-                    autoImport = true,
-                    useScaffoldSnippets = true
+                    defaultAttrNameCase = "kebabCase",
+                    defaultTagNameCase = "both"
                 },
-                format = {
-                    defaultFormatter = {
-                        html = "none",
-                        js = "prettier",
-                        ts = "prettier",
-                    }
+                definition = true,
+                diagnostics = true,
+                documentHighlight = true,
+                documentLink = true,
+                hover = true,
+                references = true,
+                rename = true,
+                renameFileRefactoring = true,
+                schemaRequestService = true,
+                semanticTokens = false,
+                signatureHelp = true,
+                typeDefinition = true
+            },
+            documentFeatures = {
+                documentColor = true,
+                documentFormatting = {
+                    defaultPrintWidth = 80
                 },
-                validation = {
-                    template = true,
-                    script = true,
-                    style = true,
-                    templateProps = true,
-                    interpolation = true
-                },
-                experimental = {
-                    templateInterpolationService = true
-                }
+                documentSymbol = true,
+                foldingRange = true,
+                linkedEditingRange = true,
+                selectionRange = true
+            },
+            typescript = {
+                serverPath = ''
             }
         },
-        root_dir = util.root_pattern("header.php", "package.json", "style.css", 'webpack.config.js')
+        settings = {
+            volar = {
+                codeLens = {
+                  references = true,
+                  pugTools = true,
+                  scriptSetupTools = true,
+                },
+            }
+        },
+        on_new_config = on_new_config,
+        root_dir = util.root_pattern('header.php', 'package.json', 'style.css', 'webpack.config.js')
     }
 
     lsp.intelephense.setup {
@@ -708,41 +810,12 @@ lua <<EOF
     }
 EOF
 
+
 " Indent Markers
+" ==============================================================================
+
 let g:indent_blankline_char = '▏'
 let g:indent_blankline_space_char = ' '
-
-" Linting (ALE)
-" ==============================================================================
-
-let b:ale_disable_lsp = 1
-let g:ale_completion_enabled = 0
-let g:ale_sign_error = '■'
-let g:ale_sign_warning = '●'
-
-let g:ale_fix_on_save = 1
-let g:ale_fixers = { 'vue': ['eslint'] }
-
-let g:ale_javascript_eslint_executable = 'eslint_d'
-let g:ale_typescript_eslint_executable = 'eslint_d'
-let g:ale_vue_eslint_executable = 'eslint_d'
-
-let g:ale_linters_explicit = 1
-let g:ale_linters = {
-    \   'typescript': ['eslint', 'tsserver'],
-    \   'javascript': ['eslint', 'tsserver'],
-    \   'vue': ['eslint', 'vls'],
-    \   'php': ['php']
-    \ }
-
-" Formatting
-" ==============================================================================
-
-" Vue formatter via Vetur formatter config
-
-" Prettier doesn't support mixed HTML/PHP so we just use this instead
-nnoremap <silent> <leader>fs <cmd>lua vim.lsp.buf.formatting_sync(nil, 1000)<CR>:w<CR>
-nnoremap <silent> <leader>fw :FormatWrite<CR>:w<CR>
 
 " TODO: move to ftplugin
 " TODO: find *.md formatter
@@ -751,40 +824,6 @@ augroup FileTypeTextwidth
 	autocmd FileType markdown set textwidth=80
 augroup END
 
-lua <<EOF
-    local filetypes = {}
-    local prettier_filetypes = {
-        'javascript',
-        'typescript',
-        'scss',
-        'css',
-        'html',
-    }
-    local prettier_formatter = function()
-        return {
-            exe = "prettier",
-            args = {
-                '--stdin-filepath',
-                vim.api.nvim_buf_get_name(0),
-            },
-            stdin = true
-        }
-    end
-    
-    for i, ft in ipairs(prettier_filetypes) do
-        filetypes[ft] = { prettier_formatter }
-    end
-
-    require('formatter').setup({
-        logging = false,
-        filetype = filetypes
-    })
-EOF
-
-augroup WebFmt
-    autocmd!
-    autocmd BufWritePre *.js,*.ts,*.html FormatWrite
-augroup END
 
 " Syntax
 " ==============================================================================
@@ -902,11 +941,11 @@ function! OpenProjectFile(project, fullscreen)
     call fzf#run(fzf#wrap(spec), a:fullscreen)
 endfunction
 
-function! SearchFileContents(fullscreen, project, k='') abort
+function! SearchFileContents(fullscreen, project, keyword='') abort
     let path = g:tbl_projects[a:project]['path']
     let label = g:tbl_projects[a:project]['label']
     let ignore = g:tbl_projects[a:project]['ignore']
-    let search_keyword = empty(a:k) ? '' : a:k
+    let search_keyword = empty(a:keyword) ? '' : a:keyword
 
     let rg_ignore = '-g ' . ignore
     let rg_command = 'rg --column --line-number --no-heading --color=always --smart-case --hidden ' .rg_ignore. ' -- %s || true'
@@ -919,6 +958,7 @@ function! SearchFileContents(fullscreen, project, k='') abort
         \ 'source': initial_command,
         \ 'dir': path,
         \ 'options': [
+        \   '--phony',
         \   '--reverse',
         \   '--inline-info',
         \   '--prompt', path. ' ',
@@ -929,26 +969,6 @@ function! SearchFileContents(fullscreen, project, k='') abort
     call fzf#vim#grep(initial_command, 1, fzf#vim#with_preview(spec), a:fullscreen)
 endfunction
 
-
-" TODO: Find 'DRY'er solution to this remap
-
-nnoremap <Leader>rh :ProjectContents home<CR>
-vnoremap <Leader>rh y \| :ProjectContents home <C-r>=escape('<C-r>"', ' \{}[]()')<CR>
-
-nnoremap <Leader>r1 :ProjectContents nest<CR>
-vnoremap <Leader>r1 y \| :ProjectContents nest <C-r>=escape('<C-r>"', ' \{}[]()')<CR>
-
-nnoremap <Leader>r2 :ProjectContents tsreddit<CR>
-vnoremap <Leader>r2 y \| :ProjectContents tsreddit <C-r>=escape('<C-r>"', ' \{}[]()')<CR>
-
-nnoremap <Leader>r3 :ProjectContents ergonode<CR>
-vnoremap <Leader>r3 y \| :ProjectContents ergonode <C-r>=escape('<C-r>"', ' \{}[]()')<CR>
-
-nnoremap <Leader>r4 :ProjectContents directus<CR>
-vnoremap <Leader>r4 y \| :ProjectContents directus <C-r>=escape('<C-r>"', ' \{}[]()')<CR>
-
-" <C-r><C-r>a
-let @b='"Vim''s quote handling is a little tricky"'
 
 " FZF - Delete Buffers
 " ==============================================================================
