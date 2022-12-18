@@ -1,15 +1,19 @@
-source $HOME/.aliases
+# ==============================================================================
+# Aliases
 
-# Path to your oh-my-zsh installation.
+# Lua LSP
+alias luamake=$HOME/lua-language-server/3rd/luamake/luamake
+
+# Dotfiles
+alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+
+# ==============================================================================
+# ZSH
+
 export ZSH="$HOME/.oh-my-zsh"
 
-# See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="hyperzsh"
+ZSH_THEME="robbyrussell"
 
-# Standard plugins can be found in ~/.oh-my-zsh/plugins/*
-# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
 plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
@@ -19,19 +23,13 @@ source $ZSH/oh-my-zsh.sh
 # much, much faster.
 DISABLE_UNTRACKED_FILES_DIRTY="true"
 
-# Preferred editor for local and remote sessions
-if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='vim'
-else
-  export EDITOR='nvim'
-fi
+# ==============================================================================
+# (Neo)vim
 
-# ============================================================== /
-# Vim mode
-
+export EDITOR='nvim'
 export KEYTIMEOUT=1
 
-# Use vim keys in tab complete menu:
+# Use vim keys in tab-complete menu:
 bindkey -M menuselect 'h' vi-backward-char
 bindkey -M menuselect 'k' vi-up-line-or-history
 bindkey -M menuselect 'l' vi-forward-char
@@ -54,6 +52,7 @@ function zle-keymap-select {
     echo -ne '\e[5 q'
   fi
 }
+
 zle -N zle-keymap-select
 
 zle-line-init() {
@@ -82,11 +81,7 @@ for m in visual viopp; do
   done
 done
 
-# Initiate Key Remaps (e.g, Caps as Esc)
-# only for X server
-# xmodmap ~/.Xmodmap
-
-# ============================================================== /
+# ===============================================================================
 # FZF
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -97,17 +92,14 @@ export FZF_DEFAULT_OPTS="
     --inline-info
     --height 50% -1
 "
-# Use c-n / c-p instead of this
-# --bind alt-j:down,alt-k:up
 
-# Ripgrep for FZF
+# Ripgrep Ignore Glob
 RG_IGNORE="'!{.git,node_modules,vendor,dist,build}/*'"
-# RG_IGNORE="'!{.git,node_modules,**/node_modules,vendor,dist,**/dist,build}/*'"
 
 export FZF_DEFAULT_COMMAND="rg --no-require-git --files --hidden -g $RG_IGNORE"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
-# FZF Git Checkout
+# Git Checkout
 fgc() {
   local branches branch
   branches=$(git --no-pager branch -vv) &&
@@ -115,7 +107,7 @@ fgc() {
   git checkout $(echo "$branch" | awk '{print $1}' | sed "s/.* //")
 }
 
-# FZF file search via ripgrep and expands argument(s) as path(s)
+# File search w/ ripgrep and expands argument(s) as path(s)
 fra() {
   local files file
   files=$(rg --files $*) &&
@@ -123,37 +115,31 @@ fra() {
   [[ "$file" = "" ]] && return || echo "$file" | xargs nvim
 }
 
-# ============================================================== /
+# ==============================================================================
 # Kitty
 
-autoload -Uz compinit
-compinit
+autoload -Uz compinit && compinit
 
 # Completion
 kitty + complete setup zsh | source /dev/stdin
 
-# ============================================================== /
-# Alacritty
+# ==============================================================================
+# NVM
 
-fpath+=${ZDOTDIR:-~}/.zsh_functions
-
-# ============================================================== /
-# $PATH variables
-
-# export QT_QPA_PLATFORM=xcb
-
-# Source NVM
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 
-# Add RVM to path for scripting. Make sure this is the last PATH variable change.
-# export PATH="$PATH:$HOME/.rvm/bin"
+# Init
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-# Nvim
-# export PATH="$PATH:$HOME/neovim/bin"
+# Nvm shell completion
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" 
 
-# QMK
+# ==============================================================================
+# PATH
+
 export PATH="$PATH:$HOME/.local/bin"
-
-# Yarn
 export PATH="$PATH:$HOME/.yarn/bin"
+
+# ==============================================================================
+# Rust
+. "$HOME/.cargo/env"
