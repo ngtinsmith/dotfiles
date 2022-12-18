@@ -1,3 +1,6 @@
+" NOTE: Not maintained, kept for reference
+" see `~/.config/nvim/init.lua` for lua migrated version
+
 let mapleader=' '
 
 " Command Mode
