@@ -1,0 +1,7 @@
+require('user/plugins/packer')
+require('user/plugins/cmp')
+require('user/plugins/lsp')
+require('user/plugins/lualine')
+require('user/plugins/null-ls')
+require('user/plugins/fzf')
+require('user/plugins/treesitter')
