@@ -7,10 +7,8 @@ Configuration files tracked with Git `--bare` repo.
 ## Table of Contents
 
 - [Setup](#setup)
-    - [Install Script](#install-script)
-- [Usage](#usage)
-- [Configurations](#configurations)
-    - [Neovim](#neovim)
+    - [Install script](#install-script)
+    - [Usage](#usage)
 
 ## Setup
 
@@ -88,7 +86,7 @@ Personalised configuration steps based on Atlassian's Guide - [Dotfiles: Best Wa
 
 - You're done, from now on you can now type `config` commands to add and update your dotfiles
 
-### Install Script
+### Install script
 As a shortcut not to have to remember all these steps on any new machine you want to setup, you can create a simple script and store it as Bitbucket snippet:
 
 ```sh
