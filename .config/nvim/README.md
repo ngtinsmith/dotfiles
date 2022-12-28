@@ -15,13 +15,16 @@
             ├── core
             │   ├── autocmd.lua
             │   └── options.lua
-            └── plugins
-                ├── cmp.lua
-                ├── fzf.lua
-                ├── init.lua
-                ├── lsp.lua
-                ├── lualine.lua
-                ├── null-ls.lua
-                ├── packer.lua
-                └── treesitter.lua
-
+            ├── plugins
+            │   ├── cmp.lua
+            │   ├── fzf.lua
+            │   ├── init.lua
+            │   ├── lsp.lua
+            │   ├── lualine.lua
+            │   ├── null-ls.lua
+            │   ├── packer.lua
+            │   └── treesitter.lua
+            └── projects
+                ├── commands.lua
+                ├── config.lua
+                └── keymaps.lua
