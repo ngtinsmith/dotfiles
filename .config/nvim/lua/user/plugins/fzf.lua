@@ -26,12 +26,15 @@ function M.open_fzf_files()
     })
 end
 
-function M.search_project_file(project_key)
-    local project = vim.g.user_projects[project_key]
+--- Search files in project path
+--
+-- @param #string project_name - Project name in `vim.g.user_projects` table
+function M.search_project_file(project_name)
+    local project = vim.g.user_projects[project_name]
 
-    if project == nil then
+    if not project then
         vim.notify(
-            string.format('"%s" doesn\'t exist in `vim.g.user_projects` global', project_key),
+            string.format('"%s" doesn\'t exist in `vim.g.user_projects` global', project_name),
             vim.log.levels.ERROR
         )
 
@@ -57,12 +60,16 @@ function M.search_project_file(project_key)
     })
 end
 
-function M.search_file_contents(project_key, search_keyword)
-    local project = vim.g.user_projects[project_key]
+--- Search file contents in project path
+--
+-- @param #string project_name - Project name in `vim.g.user_projects` table
+-- @param #string search_keyword - String to search
+function M.search_file_contents(project_name, search_keyword)
+    local project = vim.g.user_projects[project_name]
 
     if not project then
         vim.notify(
-            string.format('"%s" doesn\'t exist in `vim.g.user_projects` global', project_key),
+            string.format('"%s" doesn\'t exist in `vim.g.user_projects` global', project_name),
             vim.log.levels.ERROR
         )
 
