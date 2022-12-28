@@ -1,7 +1,6 @@
 local map = vim.keymap.set
 local utils = require('user/utils')
 local fzf_user = require('user/plugins/fzf')
-local fzf_lua = require('fzf-lua')
 
 
 -- =============================================================================
@@ -85,31 +84,6 @@ map('n', 'g0', vim.lsp.buf.document_symbol, { silent = true })
 map('n', 'gW', vim.lsp.buf.workspace_symbol, { silent = true })
 
 
--- ============================================================================
--- FZF
-
-map('n', '<Leader>d', function()
-    fzf_lua.buffers({
-        prompt = 'BUFFERS: ',
-        fzf_opts = {
-            ['--reverse'] = '',
-            ['--inline-info'] = '',
-            ['--tiebreak'] = 'length',
-        }
-    })
-end)
-
-map('n', '<Leader>hh', function()
-    fzf_lua.files({
-        prompt = 'FILES: ',
-        fzf_opts = {
-            ['--reverse'] = '',
-            ['--inline-info'] = '',
-        }
-    })
-end)
-
-
 -- =============================================================================
 -- Searching
 
@@ -118,21 +92,9 @@ map('v', '<C-f>', utils.search_in_place)
 map('x', '*', utils.search_in_place)
 
 
--- ============================================================================-
--- Projects
+-- ============================================================================
+-- FZF
 
-local ignore_glob = '"!{.git,node_modules}/**"'
+map('n', '<Leader>d', fzf_user.open_fzf_buffers)
+map('n', '<Leader>hh', fzf_user.open_fzf_files)
 
-map('n', '<C-p>', function()
-    fzf_user.search_project_file({
-        path = '~/.config/nvim',
-        ignore = ignore_glob
-    })
-end)
-
-map('n', '<Leader>rp', function()
-    fzf_user.search_file_contents({
-        path = '~/.config/nvim/lua',
-        ignore = ignore_glob
-    }, 'local ')
-end)
