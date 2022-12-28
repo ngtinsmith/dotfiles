@@ -18,7 +18,6 @@ vim.opt.showmatch = true
 -- Window
 vim.opt.splitright = true
 vim.opt.splitbelow = true
-vim.opt.cmdheight = 0
 vim.opt.shortmess:append('c')
 vim.opt.laststatus = 3
 vim.opt.signcolumn = 'number'
