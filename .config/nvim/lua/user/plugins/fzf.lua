@@ -1,32 +1,75 @@
+local home_path = os.getenv('HOME')
 local fzf = require('fzf-lua')
 
 local M = {}
 
-function M.search_project_file(project)
+M.base_ignore = '"!{.git,node_modules,build,dist}/**"'
+
+function M.open_fzf_buffers()
+    fzf.buffers({
+        prompt = 'Buffers: ',
+        fzf_opts = {
+            ['--reverse'] = '',
+            ['--inline-info'] = '',
+            ['--tiebreak'] = 'length',
+        }
+    })
+end
+
+function M.open_fzf_files()
+    fzf.files({
+        prompt = 'Files: ',
+        fzf_opts = {
+            ['--reverse'] = '',
+            ['--inline-info'] = '',
+        }
+    })
+end
+
+function M.search_project_file(project_key)
+    local project = vim.g.user_projects[project_key]
+
+    if project == nil then
+        vim.notify(
+            string.format('"%s" doesn\'t exist in `vim.g.user_projects` global', project_key),
+            vim.log.levels.ERROR
+        )
+
+        return
+    end
+
     local rg_ignore = string.format('--glob %s', project.ignore)
     local rg_files = string.format('--hidden --files -- %s', project.path)
     local rg_args = string.format('%s %s', rg_ignore, rg_files)
     local rg_command = string.format('rg --no-require-git %s', rg_args)
 
     fzf.fzf_exec(rg_command, {
+        prompt = string.format('Files (%s): ', project.label),
+        actions = fzf.defaults.actions.files,
         fzf_opts = {
             ['--with-nth'] = '-3..',
             ['--reverse'] = '',
             ['--inline-info'] = '',
         },
-        actions = fzf.defaults.actions.files
+        fn_transform = function(line)
+            return string.gsub(line, home_path or '', '~')
+        end
     })
 end
 
-function M.search_file_contents(project, keyword)
-    local path = project.path
-    local _keyword = keyword ~= nil and keyword:len() > 0
-        and keyword
-        or ''
+function M.search_file_contents(project_key, search_keyword)
+    local project = vim.g.user_projects[project_key]
+
+    if not project then
+        vim.notify(
+            string.format('"%s" doesn\'t exist in `vim.g.user_projects` global', project_key),
+            vim.log.levels.ERROR
+        )
+
+        return
+    end
 
     local rg_ignore = string.format('--glob %s', project.ignore)
-    local rg_content_pattern = string.format('"%s"', _keyword)
-
     local rg_args = {
         '--column',
         '--line-number',
@@ -37,21 +80,26 @@ function M.search_file_contents(project, keyword)
         rg_ignore,
     }
 
-    local rg_command = string.format(
-        'rg %s %s %s',
-        table.concat(rg_args, ' '),
-        rg_content_pattern,
-        path
-    )
+    local rg_command = string.format('rg %s', table.concat(rg_args, ' '))
 
-    fzf.fzf_exec(rg_command, {
-        prompt = string.format('%s: ', path),
+    fzf.fzf_live(function(query)
+        -- pre-escape parenthesis for shell command
+        local escaped_query_parens = vim.fn.escape(query, '{}[]()')
+
+        return rg_command .. ' -- ' .. vim.fn.shellescape(escaped_query_parens)
+    end, {
+        query = search_keyword,
+        cwd = project.path,
+        prompt = string.format('Grep %s: ', project.path),
+        actions = fzf.defaults.actions.files,
+        file_icons = true,
+        color_icons = true,
+        previewer = 'builtin',
         fzf_opts = {
             ['--phony'] = '',
             ['--reverse'] = '',
             ['--inline-info'] = '',
         },
-        actions = fzf.defaults.actions.files
     })
 end
 
