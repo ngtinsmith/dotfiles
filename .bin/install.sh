@@ -1,23 +1,27 @@
 #!/bin/bash
 
+if [[ ! -s ~/.dotfiles ]]; then
+    mkdir ~/.dotfiles
+fi
+
 # prevent weird git repo recursion problems
 echo ".dotfiles" >> .gitignore
 
 git clone --bare git@github.com:ngtinsmith/dotfiles.git $HOME/.dotfiles
 
-function config {
+function dotfiles {
    /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME $@
 }
 
-config checkout
+dotfiles checkout
 
 if [ $? = 0 ]; then
-    echo "Checked out config.";
+    echo "Checked out dotfiles config.";
   else
-    echo "Backing up pre-existing dot files.";
-    mkdir -p .config-backup
-    config checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | xargs -I{} mv {} .config-backup/{}
+    echo "Backing up pre-existing dotfiles.";
+    mkdir -p .dotfiles-backup
+    dotfiles checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | xargs -I{} mv {} .dotfiles-backup/{}
 fi;
 
-config checkout
-config config --local status.showUntrackedFiles no
+dotfiles checkout
+dotfiles config --local status.showUntrackedFiles no
