@@ -29,18 +29,19 @@ Personalised configuration steps based on Atlassian's Guide - [Dotfiles: Best Wa
 - Define the alias in the current shell scope (OR add it to your `.aliases`, `.bashrc`, or `.zshrc` if you don't have it in your dotfiles-tracked-repo's shell aliases or rc files yet)
 
     ```sh
-    alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+    alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
     ```
 
     This is the alias that you'll use to handle your dotfiles (bare git) changes, which can be called from any directory, even from inside another git repo!
 
     ```sh
     # therefore, these commands:
-    config status
-    config push
+    dotfiles status
+    dotfiles push
 
-    # are just git commands like below -- only that the `config`
-    # command uses our `.dotfiles` bare repo as git context 
+    # are just git commands like below; only that the `dotfiles`
+    # command uses our `.dotfiles` bare repo as git context defined
+    # by our alias
     git status
     git push
     ```
@@ -49,7 +50,7 @@ Personalised configuration steps based on Atlassian's Guide - [Dotfiles: Best Wa
 - Checkout the actual content from the bare repository to your `$HOME`:
 
     ```sh
-    config checkout
+    dotfiles checkout
     ```
 
 - The step above might fail with a message like:
@@ -67,30 +68,30 @@ Personalised configuration steps based on Atlassian's Guide - [Dotfiles: Best Wa
     The solution is simple: back up the files if you care about them, remove them if you don't care. I provide you with a possible rough shortcut to move all the offending files automatically to a backup folder:
 
     ```sh
-    mkdir -p .config-backup && \
-    config checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | \
-    xargs -I{} mv {} .config-backup/{}
+    mkdir -p .dotfiles-backup && \
+    dotfiles checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | \
+    xargs -I{} mv {} .dotfiles-backup/{}
     ```
 
 - Re-run the check out if you had problems:
 
     ```sh
-    config checkout
+    dotfiles checkout
     ```
 
 - Set the Git flag `showUntrackedFiles` to `no` on this specific (local) repository:
 
     ```sh
-    config config --local status.showUntrackedFiles no
+    dotfiles config --local status.showUntrackedFiles no
     ```
 
-- You're done, from now on you can now type `config` commands to add and update your dotfiles
+- You're done, from now on you can now type `dotfiles` commands to add and update your dotfiles
 
 ### Install script
 As a shortcut not to have to remember all these steps on any new machine you want to setup, you can create a simple script and store it as Bitbucket snippet:
 
 ```sh
-curl -Lks https://raw.githubusercontent.com/ngtinsmith/dotfiles/master/.bin/install.sh | /bin/bash
+curl -o- https://raw.githubusercontent.com/ngtinsmith/dotfiles/master/.bin/install.sh | bash
 ```
 
 
@@ -99,43 +100,47 @@ curl -Lks https://raw.githubusercontent.com/ngtinsmith/dotfiles/master/.bin/in
 ```sh
 #!/bin/bash
 
+if [[ ! -s ~/.dotfiles ]]; then
+    mkdir ~/.dotfiles
+fi
+
 # prevent weird git repo recursion problems
 echo ".dotfiles" >> .gitignore
 
 git clone --bare git@github.com:ngtinsmith/dotfiles.git $HOME/.dotfiles
 
-function config {
+function dotfiles {
    /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME $@
 }
 
-config checkout
+dotfiles checkout
 
 if [ $? = 0 ]; then
-    echo "Checked out config.";
+    echo "Checked out dotfiles config.";
   else
-    echo "Backing up pre-existing dot files.";
-    mkdir -p .config-backup
-    config checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | xargs -I{} mv {} .config-backup/{}
+    echo "Backing up pre-existing dotfiles.";
+    mkdir -p .dotfiles-backup
+    dotfiles checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | xargs -I{} mv {} .dotfiles-backup/{}
 fi;
 
-config checkout
-config config --local status.showUntrackedFiles no
+dotfiles checkout
+dotfiles config --local status.showUntrackedFiles no
 ```
 
 ### Usage
 
 ```sh
 # add new config
-config status
-config add .vimrc
-config commit -m "add vimrc"
+dotfiles status
+dotfiles add .vimrc
+dotfiles commit -m "add vimrc"
 
 # add directory of configs / modules
-config add ~/.config/nvim/init.lua
-config add ~/.config/nvim/lua
-config commit -m "add nvim init.lua and lua modules"
+dotfiles add ~/.config/nvim/init.lua
+dotfiles add ~/.config/nvim/lua
+dotfiles commit -m "add nvim init.lua and lua modules"
 
 # push changes
-config push
+dotfiles push
 ```
 
