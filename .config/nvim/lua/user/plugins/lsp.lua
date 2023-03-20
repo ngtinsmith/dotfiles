@@ -1,7 +1,8 @@
+require('neodev').setup({})
+
 local lspconfig = require('lspconfig')
 local cmp = require('cmp_nvim_lsp')
-
-require('neodev').setup({})
+local capabilities = cmp.default_capabilities()
 
 -- =============================================================================
 -- Enable borders for hover/signature help
@@ -16,13 +17,15 @@ vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(
 -- =============================================================================
 -- LSP Servers
 
+local M = {}
+
 local servers = {
     cssls = {},
+    emmet_ls = {},
     tsserver = {},
     vimls = {},
     volar = {},
-    rust_analyzer = {},
-    sumneko_lua = {
+    lua_ls = {
         cmd = { vim.fn.fnamemodify('~/lua-language-server/bin/lua-language-server', ':p') },
         filetypes = { 'lua' },
         settings = {
@@ -60,33 +63,33 @@ local servers = {
 -- =============================================================================
 -- LSP Hooks
 
-local create_default_config = function()
-    local capabilities = cmp.default_capabilities()
-    local on_attach = function(client, bufnr)
-        capabilities.textDocument.completion.completionItem.snippetSupport = true
+M.on_attach = function(client, bufnr)
+    capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-        if client.supports_method('textDocument/formatting') then
-            local lsp_formatting = vim.api.nvim_create_augroup('LspFormatting', {})
+    if client.supports_method('textDocument/formatting') then
+        local lsp_formatting = vim.api.nvim_create_augroup('LspFormatting', {})
 
-            vim.api.nvim_clear_autocmds({ group = lsp_formatting, buffer = bufnr })
-            vim.api.nvim_create_autocmd('BufWritePre', {
-                desc = 'Auto-format current buffer on (before) save',
-                group = lsp_formatting,
-                buffer = bufnr,
-                callback = function()
-                    vim.lsp.buf.format({ bufnr = bufnr })
-                end,
-            })
-        end
-
-        if client.server_capabilities.renameProvider then
-            vim.keymap.set('n', '<F2>', vim.lsp.buf.rename, { silent = true })
-        end
+        vim.api.nvim_clear_autocmds({ group = lsp_formatting, buffer = bufnr })
+        vim.api.nvim_create_autocmd('BufWritePre', {
+            desc = 'Auto-format current buffer on (before) save',
+            group = lsp_formatting,
+            buffer = bufnr,
+            callback = function()
+                vim.lsp.buf.format({ bufnr = bufnr })
+            end,
+        })
     end
 
+    if client.server_capabilities.renameProvider then
+        vim.keymap.set('n', '<F2>', vim.lsp.buf.rename, { silent = true })
+    end
+end
+
+
+local create_default_config = function()
     return {
         capabilities = capabilities,
-        on_attach = on_attach
+        on_attach = M.on_attach
     }
 end
 
@@ -98,3 +101,5 @@ for server, config in pairs(servers) do
 
     lspconfig[server].setup(_config)
 end
+
+return M
