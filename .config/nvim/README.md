@@ -14,6 +14,7 @@
             ├── utils.lua
             ├── core
             │   ├── autocmd.lua
+            │   ├── diagnostics.lua
             │   └── options.lua
             ├── plugins
             │   ├── cmp.lua
@@ -21,8 +22,10 @@
             │   ├── init.lua
             │   ├── lsp.lua
             │   ├── lualine.lua
+            │   ├── neo-tree.lua
             │   ├── null-ls.lua
             │   ├── packer.lua
+            │   ├── rust-tools.lua
             │   └── treesitter.lua
             └── projects
                 ├── commands.lua
