@@ -75,13 +75,26 @@ map('v', '<Leader>p', '_dP')
 -- =============================================================================
 -- LSP
 
-map('n', 'gd', vim.lsp.buf.definition, { silent = true })
-map('n', 'gh', vim.lsp.buf.hover, { silent = true })
-map('n', 'gD', vim.lsp.buf.implementation, { silent = true })
-map('n', '1gD', vim.lsp.buf.type_definition, { silent = true })
-map('n', 'gr', vim.lsp.buf.references, { silent = true })
-map('n', 'g0', vim.lsp.buf.document_symbol, { silent = true })
-map('n', 'gW', vim.lsp.buf.workspace_symbol, { silent = true })
+local bufopts = { silent = true }
+
+map('n', 'gD', vim.lsp.buf.declaration, bufopts)
+map('n', 'gd', vim.lsp.buf.definition, bufopts)
+map('n', 'gh', vim.lsp.buf.hover, bufopts)
+map('n', 'gi', vim.lsp.buf.implementation, bufopts)
+map('n', 'gr', vim.lsp.buf.references, bufopts)
+map('n', 'g0', vim.lsp.buf.document_symbol, bufopts)
+map('n', 'gW', vim.lsp.buf.workspace_symbol, bufopts)
+map('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
+map('n', 'gl', vim.diagnostic.open_float, bufopts)
+map('n', '[d', vim.diagnostic.goto_prev, bufopts)
+map('n', ']d', vim.diagnostic.goto_next, bufopts)
+map('n', '<leader>td', vim.lsp.buf.type_definition, bufopts)
+map('n', '<leader>ca', vim.lsp.buf.code_action, bufopts)
+map('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, bufopts)
+map('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
+map('n', '<leader>wl', function()
+    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+end, bufopts)
 
 
 -- =============================================================================
@@ -97,4 +110,3 @@ map('x', '*', utils.search_in_place)
 
 map('n', '<Leader>d', fzf_user.open_fzf_buffers)
 map('n', '<Leader>hh', fzf_user.open_fzf_files)
-
