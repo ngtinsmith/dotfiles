@@ -18,4 +18,4 @@ require('user/projects/commands')
 -- TODO: find how to set in bare repo
 
 vim.env.GIT_WORK_TREE = vim.fn.expand('~')
-vim.env.GIT_DIR = vim.fn.expand('~/.cfg')
+vim.env.GIT_DIR = vim.fn.expand('~/.dotfiles')
