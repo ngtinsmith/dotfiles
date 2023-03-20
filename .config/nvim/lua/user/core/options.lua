@@ -24,7 +24,7 @@ vim.opt.signcolumn = 'number'
 vim.opt.clipboard = 'unnamedplus'
 
 -- Native autocomplete
-vim.opt.completeopt = 'menuone,noselect'
+vim.opt.completeopt = { 'menuone', 'noselect' }
 
 -- time out for key codes
 -- wait up to 1000 ms after Esc for special key
