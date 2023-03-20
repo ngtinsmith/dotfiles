@@ -2,10 +2,12 @@
 # Aliases
 
 # Lua LSP
-alias luamake=$HOME/lua-language-server/3rd/luamake/luamake
+if [[ ! $(uname) == "Darwin" ]]; then
+    alias luamake=$HOME/lua-language-server/3rd/luamake/luamake
+fi
 
 # Dotfiles
-alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 
 # ==============================================================================
 # ZSH
@@ -14,7 +16,14 @@ export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME="robbyrussell"
 
-plugins=(git)
+if [[ $(uname) == "Darwin" ]]; then
+    plugins=(
+        git
+        macos
+    )
+else
+    plugins=(git)
+fi
 
 source $ZSH/oh-my-zsh.sh
 
@@ -142,4 +151,4 @@ export PATH="$PATH:$HOME/.yarn/bin"
 
 # ==============================================================================
 # Rust
-. "$HOME/.cargo/env"
+ [ -s "$HOME/.cargo/env" ] && \. "$HOME/.cargo/env"
