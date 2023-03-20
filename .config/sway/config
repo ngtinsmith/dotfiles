@@ -16,6 +16,8 @@ set $down j
 set $up k
 set $right l
 
+set $resize_px 30px
+
 # Your preferred terminal emulator
 set $term kitty
 
@@ -185,20 +187,27 @@ mode "resize" {
     # right will grow the containers width
     # up will shrink the containers height
     # down will grow the containers height
-    bindsym $left resize shrink width 10px
-    bindsym $down resize grow height 10px
-    bindsym $up resize shrink height 10px
-    bindsym $right resize grow width 10px
+    bindsym $left resize shrink width $resize_px
+    bindsym $down resize grow height $resize_px
+    bindsym $up resize shrink height $resize_px
+    bindsym $right resize grow width $resize_px
 
     # Ditto, with arrow keys
-    bindsym Left resize shrink width 10px
-    bindsym Down resize grow height 10px
-    bindsym Up resize shrink height 10px
-    bindsym Right resize grow width 10px
+    bindsym Left resize shrink width $resize_px
+    bindsym Down resize grow height $resize_px
+    bindsym Up resize shrink height $resize_px
+    bindsym Right resize grow width $resize_px
 
     # Return to default mode
     bindsym Return mode "default"
     bindsym Escape mode "default"
+
+    # Resize percent
+    bindsym 1 resize set width 20 ppt
+    bindsym 2 resize set width 25 ppt
+    bindsym 3 resize set width 33 ppt
+    bindsym 4 resize set width 40 ppt
+    bindsym 5 resize set width 50 ppt
 }
 bindsym $mod+r mode "resize"
 
@@ -237,5 +246,9 @@ bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
 bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
 
 gaps inner 8
+
+# Apps
+
+for_window [title="tauri$"] resize set width 640px
 
 include @sysconfdir@/sway/config.d/*
