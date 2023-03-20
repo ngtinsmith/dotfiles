@@ -8,6 +8,8 @@ nls.setup({
         nls_formatting.prettierd.with({
             disabled_filetypes = { 'markdown' },
         }),
-        nls_diagnostics.eslint_d,
+        nls_diagnostics.eslint_d.with({
+            disabled_filetypes = { 'javascript' }
+        }),
     },
 })
