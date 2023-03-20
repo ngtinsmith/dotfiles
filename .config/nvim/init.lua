@@ -5,6 +5,7 @@ require('user/colors')
 require('user/keymaps')
 require('user/core/autocmd')
 require('user/core/options')
+require('user/core/diagnostics')
 
 -- Projects
 
