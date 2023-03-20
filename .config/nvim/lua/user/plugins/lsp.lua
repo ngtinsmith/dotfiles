@@ -19,6 +19,13 @@ vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(
 
 local M = {}
 
+local uname = vim.loop.os_uname().sysname
+local lua_ls_cmd = uname == 'Darwin'
+    -- installed via brew
+    and 'lua-language-server'
+    -- built from source
+    or vim.fn.fnamemodify('~/lua-language-server/bin/lua-language-server', ':p')
+
 local servers = {
     cssls = {},
     emmet_ls = {},
@@ -26,7 +33,7 @@ local servers = {
     vimls = {},
     volar = {},
     lua_ls = {
-        cmd = { vim.fn.fnamemodify('~/lua-language-server/bin/lua-language-server', ':p') },
+        cmd = { lua_ls_cmd },
         filetypes = { 'lua' },
         settings = {
             Lua = {
