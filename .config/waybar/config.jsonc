@@ -7,10 +7,10 @@
     "margin": "8 8 0 8",
 
     // Choose the order of the modules
-    "modules-left": ["sway/workspaces", "sway/mode", "sway/scratchpad", "custom/media"],
+    "modules-left": ["sway/workspaces", "sway/window", "sway/mode", "sway/scratchpad", "custom/media"],
     "modules-center": ["clock"],
     "modules-right": [
-	"idle_inhibitor",
+        "idle_inhibitor",
         "memory",
         "cpu",
         "temperature",
