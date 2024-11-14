@@ -1,3 +1,9 @@
+local icons = {
+    s = '◼',
+    c = '⏺',
+    t = '▲',
+}
+
 vim.diagnostic.config({
     float = {
         focusable = false,
@@ -11,5 +17,13 @@ vim.diagnostic.config({
                 return string.format('(%s) ', diagnostic.source)
             end
         end
-    }
+    },
+    signs = {
+        text = {
+            [vim.diagnostic.severity.ERROR] = icons.s,
+            [vim.diagnostic.severity.WARN] = icons.t,
+            [vim.diagnostic.severity.HINT] = icons.c,
+            [vim.diagnostic.severity.INFO] = icons.c,
+        },
+    },
 })
