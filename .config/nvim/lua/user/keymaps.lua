@@ -37,6 +37,10 @@ map('n', '<C-h>', 'gT')
 map('n', '<C-l>', 'gt')
 map('n', '<Leader><Tab>', ':b#<CR>', { silent = true })
 
+-- Navigation - Quickfix List
+-- map('n', '<C-j>', ':<CR><C-w>n')
+-- map('n', '<C-k>', ':<CR><C-w>p')
+
 -- Split - Resize
 map('', '<C-Up>', ':res +1<CR>', { silent = true })
 map('', '<C-Down>', ':res -1<CR>', { silent = true })
@@ -77,6 +81,27 @@ map('v', '<Leader>p', '_dP')
 
 local bufopts = { silent = true }
 
+-- TODO: move and export from none-ls config
+local null_format = function()
+    local buf = vim.api.nvim_get_current_buf()
+    local null_ls_sources = require('null-ls.sources')
+    local ft = vim.bo[buf].filetype
+
+    local has_null_ls = #null_ls_sources.get_available(ft, 'NULL_LS_FORMATTING') > 0
+
+    vim.lsp.buf.format({
+        bufnr = buf,
+        async = true,
+        filter = function(client)
+            if has_null_ls then
+                return client.name == 'null-ls'
+            else
+                return true
+            end
+        end,
+    })
+end
+
 map('n', 'gD', vim.lsp.buf.declaration, bufopts)
 map('n', 'gd', vim.lsp.buf.definition, bufopts)
 map('n', 'gh', vim.lsp.buf.hover, bufopts)
@@ -89,13 +114,15 @@ map('n', 'gl', vim.diagnostic.open_float, bufopts)
 map('n', '[d', vim.diagnostic.goto_prev, bufopts)
 map('n', ']d', vim.diagnostic.goto_next, bufopts)
 map('n', '<leader>td', vim.lsp.buf.type_definition, bufopts)
-map('n', '<leader>ca', vim.lsp.buf.code_action, bufopts)
+map('n', '<leader>ca', ':FzfLua lsp_code_actions<CR>', bufopts)
 map('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, bufopts)
 map('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
 map('n', '<leader>wl', function()
     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
 end, bufopts)
 
+map('n', '<leader>f', null_format, bufopts)
+map('v', '<leader>f', null_format, bufopts)
 
 -- =============================================================================
 -- Searching
