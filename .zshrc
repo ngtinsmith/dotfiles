@@ -6,8 +6,14 @@ if [[ ! $(uname) == "Darwin" ]]; then
     alias luamake=$HOME/lua-language-server/3rd/luamake/luamake
 fi
 
+# ==============================================================================
 # Dotfiles
+
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+
+# TODO: try without `$` sign
+# export $DOTFILES_DIR="$HOME"
+# export $DOTFILES_TREE="$HOME/.dotfiles"
 
 # ==============================================================================
 # ZSH
@@ -152,3 +158,9 @@ export PATH="$PATH:$HOME/.yarn/bin"
 # ==============================================================================
 # Rust
  [ -s "$HOME/.cargo/env" ] && \. "$HOME/.cargo/env"
+export PATH="/usr/local/opt/openjdk/bin:$PATH"
+
+# ==============================================================================
+# OPENSSL
+# export NODE_OPTIONS=--openssl-legacy-provider
+
