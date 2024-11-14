@@ -28,10 +28,14 @@ local lua_ls_cmd = uname == 'Darwin'
 
 local servers = {
     cssls = {},
-    emmet_ls = {},
-    tsserver = {},
+    tailwindcss = {},
+    eslint = {},
+    emmet_language_server = {},
+    svelte = {},
+    volar = {
+        -- Vue 3
+    },
     vimls = {},
-    volar = {},
     lua_ls = {
         cmd = { lua_ls_cmd },
         filetypes = { 'lua' },
@@ -58,34 +62,71 @@ local servers = {
                     defaultConfig = {
                         indent_style = 'space',
                         indent_size = '4',
-                        quote_style = 'single',
+                        quote_style = 'double',
                         keep_one_space_between_table_and_bracket = 'true',
                     },
                 },
             },
         },
     },
+    -- vuels = {
+    --     -- Vue 2
+    --     on_attach = function(client)
+    --         --[[
+    --             # Enable Vetur's special *.vue formatter
+
+    --             This line below is required if you:
+    --             - want to format using Nvim's native `vim.lsp.buf.formatting**()`
+    --             - want to use Vetur's formatting config in `settings.vetur.format {...}`
+    --             - want to defer to eslint(_d) to fix only the <template> using eslint-fix
+    --         --]]
+    --         client.resolved_capabilities.document_formatting = true
+
+    --         -- TODO: fix sync blocking on format
+    --         vim.api.nvim_exec([[
+    --             augroup VueFmt
+    --                 autocmd!
+    --                 autocmd BufWritePre *.vue lua vim.lsp.buf.formatting_sync(nil, 1000)
+    --             augroup END
+    --         ]], true)
+    --     end,
+    --     capabilities = capabilities,
+    --     settings = {
+    --         vetur = {
+    --             completion = {
+    --                 autoImport = true,
+    --                 useScaffoldSnippets = true
+    --             },
+    --             format = {
+    --                 defaultFormatter = {
+    --                     html = 'none',
+    --                     js = 'prettier',
+    --                     ts = 'prettier',
+    --                 },
+    --                 scriptInitialIndent = true,
+    --                 styleInitialIndent = true
+    --             },
+    --             validation = {
+    --                 template = true,
+    --                 script = true,
+    --                 style = true,
+    --                 templateProps = true,
+    --                 interpolation = true
+    --             },
+    --             -- experimental = {
+    --             --     templateInterpolationService = true
+    --             -- }
+    --         }
+    --     },
+    --     root_dir = lspconfig.util.root_pattern("header.php", "package.json", "style.css", 'webpack.config.js')
+    -- },
 }
 
 -- =============================================================================
 -- LSP Hooks
 
-M.on_attach = function(client, bufnr)
+M.on_attach = function(client)
     capabilities.textDocument.completion.completionItem.snippetSupport = true
-
-    if client.supports_method('textDocument/formatting') then
-        local lsp_formatting = vim.api.nvim_create_augroup('LspFormatting', {})
-
-        vim.api.nvim_clear_autocmds({ group = lsp_formatting, buffer = bufnr })
-        vim.api.nvim_create_autocmd('BufWritePre', {
-            desc = 'Auto-format current buffer on (before) save',
-            group = lsp_formatting,
-            buffer = bufnr,
-            callback = function()
-                vim.lsp.buf.format({ bufnr = bufnr })
-            end,
-        })
-    end
 
     if client.server_capabilities.renameProvider then
         vim.keymap.set('n', '<F2>', vim.lsp.buf.rename, { silent = true })
