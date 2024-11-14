@@ -30,7 +30,6 @@ cmp.setup({
         ['<C-e>'] = cmp.mapping.abort(),
         -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
         ['<CR>'] = cmp.mapping.confirm({ select = true }),
-
         -- Selection
         ['<Tab>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
@@ -43,7 +42,6 @@ cmp.setup({
                 fallback() -- The fallback function sends a already mapped key. In this case, it's probably `<Tab>`.
             end
         end, { 'i', 's' }),
-
         ['<S-Tab>'] = cmp.mapping(function()
             if cmp.visible() then
                 cmp.select_prev_item()
@@ -60,10 +58,38 @@ cmp.setup({
         -- { name = 'snippy' }, -- For snippy users.
     }, {
         { name = 'buffer' },
-    })
+    }),
+    sorting = {
+        -- TJ's from reddit: https://github.com/tjdevries/config_manager/blob/78608334a7803a0de1a08a9a4bd1b03ad2a5eb11/xdg_config/nvim/after/plugin/completion.lua#L129
+        -- TODO: Would be cool to add stuff like "See variable names before method names" in rust, or something like that.
+        comparators = {
+            cmp.config.compare.offset,
+            cmp.config.compare.exact,
+            cmp.config.compare.score,
+
+            -- copied from cmp-under, but I don't think I need the plugin for this.
+            -- I might add some more of my own.
+            function(entry1, entry2)
+                local _, entry1_under = entry1.completion_item.label:find "^_+"
+                local _, entry2_under = entry2.completion_item.label:find "^_+"
+                entry1_under = entry1_under or 0
+                entry2_under = entry2_under or 0
+                if entry1_under > entry2_under then
+                    return false
+                elseif entry1_under < entry2_under then
+                    return true
+                end
+            end,
+
+            cmp.config.compare.kind,
+            cmp.config.compare.sort_text,
+            cmp.config.compare.length,
+            cmp.config.compare.order,
+        },
+    }
 })
 
--- S  et configuration for specific filetype.
+-- Set configuration for specific filetype.
 cmp.setup.filetype('gitcommit', {
     sources = cmp.config.sources({
         { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.
