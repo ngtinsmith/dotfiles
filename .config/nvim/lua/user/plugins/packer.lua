@@ -12,11 +12,11 @@ require('packer').startup(function(use)
         end,
         pre_save_cmds = {
             function()
-                print('pre save cmds')
+                require('neo-tree').close('filesystem')
             end,
             function()
-                require('neo-tree').close('filesystem')
-            end
+                vim.cmd.normal({ ':DiffviewClose<CR>', bang = true })
+            end,
         },
         cwd_change_handling = {
             post_cwd_changed_hook = function()
@@ -34,6 +34,7 @@ require('packer').startup(function(use)
 
     -- UI
 
+    use 'nvim-tree/nvim-web-devicons'
     use { 'nvim-lualine/lualine.nvim',
         requires = { 'kyazdani42/nvim-web-devicons', opt = true }
     }
@@ -41,34 +42,52 @@ require('packer').startup(function(use)
 
     use {
         'nvim-neo-tree/neo-tree.nvim',
-        branch = 'v2.x',
+        branch = 'v3.x',
         requires = {
             'nvim-lua/plenary.nvim',
             'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
             'MunifTanjim/nui.nvim',
-            {
-                -- only needed if you want to use the commands with "_with_window_picker" suffix
-                's1n7ax/nvim-window-picker',
-                tag = 'v1.*',
-                config = function()
-                    require 'window-picker'.setup({
-                        autoselect_one = true,
-                        include_current = false,
-                        filter_rules = {
-                            -- filter using buffer options
-                            bo = {
-                                -- if the file type is one of following, the window will be ignored
-                                filetype = { 'neo-tree', 'neo-tree-popup', 'notify' },
+        },
+        config = function()
+            vim.keymap.set('n', '<C-b>', ':Neotree toggle action=show<CR>', { silent = true })
 
-                                -- if the buffer type is one of following, the window will be ignored
-                                buftype = { 'terminal', 'quickfix' },
-                            },
+            require("neo-tree").setup({
+                filesystem = {
+                    follow_current_file = {
+                        enabled = true,
+                        leave_dirs_open = true,
+                    },
+                },
+            })
+        end
+    }
+
+    use {
+        'luukvbaal/statuscol.nvim',
+        config = function()
+            local builtin = require('statuscol.builtin')
+
+            require('statuscol').setup({
+                relculright = true,
+                ft_ignore = { 'neo-tree', 'neotree', 'DiffviewFiles' },
+                segments = {
+                    {
+                        sign = {
+                            namespace = { 'diagnostic/signs' }
                         },
-                        other_win_hl_color = '#e35e4f',
-                    })
-                end,
-            }
-        }
+                        click = 'v:lua.ScSa'
+                    },
+                    {
+                        text = { builtin.lnumfunc, ' ' },
+                        click = 'v:lua.ScLa',
+                    },
+                    {
+                        sign = { namespace = { 'gitsigns' } },
+                        click = 'v:lua.ScSa'
+                    },
+                }
+            })
+        end
     }
 
     -- FZF
@@ -79,16 +98,31 @@ require('packer').startup(function(use)
 
     -- Docs
 
-    use({ 'iamcco/markdown-preview.nvim',
+    use {
+        'iamcco/markdown-preview.nvim',
         run = 'cd app && npm install',
         setup = function() vim.g.mkdp_filetypes = { 'markdown' } end,
         ft = { 'markdown' }
-    })
+    }
 
     -- LSP
 
     use 'neovim/nvim-lspconfig'
     use 'folke/neodev.nvim'
+    use {
+        'pmizio/typescript-tools.nvim',
+        requires = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+        config = function()
+            require('typescript-tools').setup {
+                settings = {
+                    tsserver_plugins = {
+                        '@vue/typescript-plugin',
+                    },
+                },
+                filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' }
+            }
+        end,
+    }
 
     -- Rust
 
@@ -125,11 +159,12 @@ require('packer').startup(function(use)
         'sindrets/diffview.nvim',
         requires = 'nvim-lua/plenary.nvim'
     }
+    use 'lewis6991/gitsigns.nvim'
 
     -- Utils
 
     use { 'nvim-lua/plenary.nvim' }
-    use { 'jose-elias-alvarez/null-ls.nvim' }
+    use { 'nvimtools/none-ls.nvim' }
     use {
         'kylechui/nvim-surround',
         tag = '*', -- Use for stability; omit to use `main` branch for the latest features
@@ -149,6 +184,23 @@ require('packer').startup(function(use)
     use { 'windwp/nvim-autopairs',
         config = function()
             require('nvim-autopairs').setup {}
+        end
+    }
+
+    use { 'https://gitlab.com/schrieveslaach/sonarlint.nvim' }
+
+    use 'JoosepAlviste/nvim-ts-context-commentstring'
+
+    use {
+        'Exafunction/codeium.vim',
+        config = function()
+            -- Change '<C-g>' here to any keycode you like.
+            vim.keymap.set('i', '<C-g>', function() return vim.fn['codeium#Accept']() end, { expr = true, silent = true })
+            vim.keymap.set('i', '<c-;>', function() return vim.fn['codeium#CycleCompletions'](1) end,
+                { expr = true, silent = true })
+            vim.keymap.set('i', '<c-,>', function() return vim.fn['codeium#CycleCompletions'](-1) end,
+                { expr = true, silent = true })
+            vim.keymap.set('i', '<C-x>', function() return vim.fn['codeium#Clear']() end, { expr = true, silent = true })
         end
     }
 end)
