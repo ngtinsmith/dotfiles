@@ -1,7 +1,7 @@
 local icons = {
-    s = '◼',
-    c = '⏺',
-    t = '▲',
+    square = '◼', -- U+25FC
+    circle = '●', -- U+25CB
+    triangle = '▲', -- U+25B2
 }
 
 vim.diagnostic.config({
@@ -20,10 +20,10 @@ vim.diagnostic.config({
     },
     signs = {
         text = {
-            [vim.diagnostic.severity.ERROR] = icons.s,
-            [vim.diagnostic.severity.WARN] = icons.t,
-            [vim.diagnostic.severity.HINT] = icons.c,
-            [vim.diagnostic.severity.INFO] = icons.c,
+            [vim.diagnostic.severity.ERROR] = icons.square,
+            [vim.diagnostic.severity.WARN] = icons.triangle,
+            [vim.diagnostic.severity.HINT] = icons.circle,
+            [vim.diagnostic.severity.INFO] = icons.circle,
         },
     },
 })
