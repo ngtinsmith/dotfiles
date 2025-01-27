@@ -11,10 +11,6 @@ fi
 
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 
-# TODO: try without `$` sign
-# export $DOTFILES_DIR="$HOME"
-# export $DOTFILES_TREE="$HOME/.dotfiles"
-
 # ==============================================================================
 # ZSH
 
@@ -39,7 +35,7 @@ source $ZSH/oh-my-zsh.sh
 DISABLE_UNTRACKED_FILES_DIRTY="true"
 
 # ==============================================================================
-# (Neo)vim
+# Neovim
 
 export EDITOR='nvim'
 export KEYTIMEOUT=1
@@ -99,8 +95,6 @@ done
 # ===============================================================================
 # FZF
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
 export FZF_DEFAULT_OPTS="
     --reverse
     --multi
@@ -113,6 +107,9 @@ RG_IGNORE="'!{.git,node_modules,vendor,dist,build}/*'"
 
 export FZF_DEFAULT_COMMAND="rg --no-require-git --files --hidden -g $RG_IGNORE"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
+# Set up fzf key bindings and fuzzy completion
+source <(fzf --zsh)
 
 # Git Checkout
 fgc() {
@@ -141,13 +138,9 @@ kitty + complete setup zsh | source /dev/stdin
 # ==============================================================================
 # NVM
 
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-
-# Init
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-# Nvm shell completion
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" 
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # ==============================================================================
 # PATH
@@ -157,10 +150,13 @@ export PATH="$PATH:$HOME/.yarn/bin"
 
 # ==============================================================================
 # Rust
- [ -s "$HOME/.cargo/env" ] && \. "$HOME/.cargo/env"
+[ -s "$HOME/.cargo/env" ] && \. "$HOME/.cargo/env"
 export PATH="/usr/local/opt/openjdk/bin:$PATH"
 
-# ==============================================================================
-# OPENSSL
-# export NODE_OPTIONS=--openssl-legacy-provider
 
+# bun completions
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
