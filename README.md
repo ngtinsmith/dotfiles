@@ -91,7 +91,7 @@ Personalised configuration steps based on Atlassian's Guide - [Dotfiles: Best Wa
 As a shortcut not to have to remember all these steps on any new machine you want to setup, you can create a simple script and store it as Bitbucket snippet:
 
 ```sh
-curl -o- https://raw.githubusercontent.com/ngtinsmith/dotfiles/master/.bin/install.sh | bash
+curl -o- https://raw.githubusercontent.com/ngtinsmith/dotfiles/macos/.bin/install.sh | bash
 ```
 
 
