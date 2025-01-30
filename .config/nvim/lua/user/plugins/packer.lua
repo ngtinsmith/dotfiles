@@ -261,7 +261,51 @@ require('packer').startup(function(use)
     -- Utils
 
     use { 'nvim-lua/plenary.nvim' }
-    use { 'nvimtools/none-ls.nvim' }
+    use { 'mfussenegger/nvim-lint' }
+
+    --[[
+
+    TODO(conform):
+
+    fix range formatting on lua files or in general
+    current languages with inconsistent behavior
+        lua
+        typescript
+        css / scss
+    possible conflict with lua ls or range selection / selection leave
+
+    --]]
+    use({
+        'stevearc/conform.nvim',
+        config = function()
+            require('conform').setup({
+                formatters_by_ft = {
+                    javascript = { 'prettier' },
+                    javascriptreact = { 'prettier' },
+                    typescript = { 'prettier' },
+                    typescriptreact = { 'prettier' },
+                    css = { 'prettier' },
+                    scss = { 'prettier' },
+                    json = { 'prettier' },
+                },
+                default_format_opts = {
+                    lsp_format = 'fallback',
+                },
+            })
+
+            vim.api.nvim_create_user_command('Format', function(args)
+                local range = nil
+                if args.count ~= -1 then
+                    local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
+                    range = {
+                        start = { args.line1, 0 },
+                        ['end'] = { args.line2, end_line:len() },
+                    }
+                end
+                require('conform').format({ async = true, lsp_fallback = true, range = range })
+            end, { range = true })
+        end,
+    })
     use {
         'kylechui/nvim-surround',
         tag = '*', -- Use for stability; omit to use `main` branch for the latest features
