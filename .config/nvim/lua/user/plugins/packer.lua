@@ -74,7 +74,7 @@ require('packer').startup(function(use)
         config = function()
             vim.keymap.set('n', '<C-b>', ':Neotree toggle action=show<CR>', { silent = true })
 
-            require("neo-tree").setup({
+            require('neo-tree').setup({
                 filesystem = {
                     follow_current_file = {
                         enabled = true,
@@ -115,9 +115,7 @@ require('packer').startup(function(use)
 
     -- FZF
 
-    use { 'ibhagwan/fzf-lua',
-        requires = { 'nvim-tree/nvim-web-devicons' }
-    }
+    use { 'ibhagwan/fzf-lua', requires = { 'nvim-tree/nvim-web-devicons' } }
 
     -- Docs
 
@@ -322,7 +320,8 @@ require('packer').startup(function(use)
         end
     }
     use { 'windwp/nvim-ts-autotag' }
-    use { 'windwp/nvim-autopairs',
+    use {
+        'windwp/nvim-autopairs',
         config = function()
             require('nvim-autopairs').setup {}
         end
@@ -336,14 +335,21 @@ require('packer').startup(function(use)
         'Exafunction/codeium.vim',
         config = function()
             -- Change '<C-g>' here to any keycode you like.
-            vim.keymap.set('i', '<C-g>', function() return vim.fn['codeium#Accept']() end, { expr = true, silent = true })
-            vim.keymap.set('i', '<c-;>', function() return vim.fn['codeium#CycleCompletions'](1) end,
-                { expr = true, silent = true })
-            vim.keymap.set('i', '<c-,>', function() return vim.fn['codeium#CycleCompletions'](-1) end,
-                { expr = true, silent = true })
-            vim.keymap.set('i', '<C-x>', function() return vim.fn['codeium#Clear']() end, { expr = true, silent = true })
-        end
+            vim.keymap.set('i', '<C-g>', function()
+                return vim.fn['codeium#Accept']()
+            end, { expr = true, silent = true })
+            vim.keymap.set('i', '<c-;>', function()
+                return vim.fn['codeium#CycleCompletions'](1)
+            end, { expr = true, silent = true })
+            vim.keymap.set('i', '<c-,>', function()
+                return vim.fn['codeium#CycleCompletions'](-1)
+            end, { expr = true, silent = true })
+            vim.keymap.set('i', '<C-x>', function()
+                return vim.fn['codeium#Clear']()
+            end, { expr = true, silent = true })
+        end,
     }
+
     if packer_bootstrap then
         require('packer').sync()
     end
