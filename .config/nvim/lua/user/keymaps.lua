@@ -81,25 +81,9 @@ map('v', '<Leader>p', '_dP')
 
 local bufopts = { silent = true }
 
--- TODO: move and export from none-ls config
-local null_format = function()
+local conform_fmt = function()
     local buf = vim.api.nvim_get_current_buf()
-    local null_ls_sources = require('null-ls.sources')
-    local ft = vim.bo[buf].filetype
-
-    local has_null_ls = #null_ls_sources.get_available(ft, 'NULL_LS_FORMATTING') > 0
-
-    vim.lsp.buf.format({
-        bufnr = buf,
-        async = true,
-        filter = function(client)
-            if has_null_ls then
-                return client.name == 'null-ls'
-            else
-                return true
-            end
-        end,
-    })
+    require("conform").format({ bufnr = buf, async = true })
 end
 
 map('n', 'gD', vim.lsp.buf.declaration, bufopts)
@@ -121,8 +105,9 @@ map('n', '<leader>wl', function()
     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
 end, bufopts)
 
-map('n', '<leader>f', null_format, bufopts)
-map('v', '<leader>f', null_format, bufopts)
+map('n', '<leader>f', conform_fmt, bufopts)
+map('v', '<leader>f', ':Format<CR>', bufopts) -- conform custom `:Format`
+-- map('v', '<leader>f', conform_fmt, bufopts)
 
 -- =============================================================================
 -- Searching
