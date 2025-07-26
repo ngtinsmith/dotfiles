@@ -28,10 +28,28 @@ local lua_ls_cmd = uname == 'Darwin'
 
 local servers = {
     cssls = {},
-    emmet_ls = {},
+    -- emmet_ls = {},
+    emmet_language_server = {},
     tsserver = {},
     vimls = {},
     volar = {},
+    -- tailwindcss = {
+    --     settings = {
+    --         tailwindCSS = {
+    --             classAttributes = { 'class', 'className', 'classList', 'ngClass', '.*Classes' },
+    --             -- experimental = {
+    --             --     classRegex = {
+    --             --         'Classes \\=([^;]*);', "'([^']*)'",
+    --             --         'Classes \\=([^;]*);', '\"([^\"]*)\"',
+    --             --         'Classes \\=([^;]*);', '\\`([^\\`]*)\\`',
+    --             --         ":\\s*?[\"'`]([^\"'`]*).*?,",
+    --             --         '([a-zA-Z0-9\\-:]+)'
+    --             --     }
+    --             -- }
+    --         },
+    --     }
+    -- },
+    prismals = {},
     lua_ls = {
         cmd = { lua_ls_cmd },
         filetypes = { 'lua' },
@@ -77,14 +95,14 @@ M.on_attach = function(client, bufnr)
         local lsp_formatting = vim.api.nvim_create_augroup('LspFormatting', {})
 
         vim.api.nvim_clear_autocmds({ group = lsp_formatting, buffer = bufnr })
-        vim.api.nvim_create_autocmd('BufWritePre', {
-            desc = 'Auto-format current buffer on (before) save',
-            group = lsp_formatting,
-            buffer = bufnr,
-            callback = function()
-                vim.lsp.buf.format({ bufnr = bufnr })
-            end,
-        })
+        -- vim.api.nvim_create_autocmd('BufWritePre', {
+        --     desc = 'Auto-format current buffer on (before) save',
+        --     group = lsp_formatting,
+        --     buffer = bufnr,
+        --     callback = function()
+        --         vim.lsp.buf.format({ bufnr = bufnr })
+        --     end,
+        -- })
     end
 
     if client.server_capabilities.renameProvider then

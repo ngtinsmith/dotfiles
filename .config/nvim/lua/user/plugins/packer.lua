@@ -34,6 +34,7 @@ require('packer').startup(function(use)
 
     -- UI
 
+    use 'nvim-tree/nvim-web-devicons'
     use { 'nvim-lualine/lualine.nvim',
         requires = { 'kyazdani42/nvim-web-devicons', opt = true }
     }
@@ -41,7 +42,7 @@ require('packer').startup(function(use)
 
     use {
         'nvim-neo-tree/neo-tree.nvim',
-        branch = 'v2.x',
+        branch = 'v3.x',
         requires = {
             'nvim-lua/plenary.nvim',
             'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
@@ -125,6 +126,7 @@ require('packer').startup(function(use)
         'sindrets/diffview.nvim',
         requires = 'nvim-lua/plenary.nvim'
     }
+    use 'lewis6991/gitsigns.nvim'
 
     -- Utils
 
@@ -151,4 +153,5 @@ require('packer').startup(function(use)
             require('nvim-autopairs').setup {}
         end
     }
+    use { 'JoosepAlviste/nvim-ts-context-commentstring', }
 end)

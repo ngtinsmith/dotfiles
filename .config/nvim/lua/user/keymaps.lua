@@ -96,6 +96,7 @@ map('n', '<leader>wl', function()
     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
 end, bufopts)
 
+map('n', '<leader>f', vim.lsp.buf.format, bufopts)
 
 -- =============================================================================
 -- Searching

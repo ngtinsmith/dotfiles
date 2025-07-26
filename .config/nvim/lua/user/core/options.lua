@@ -1,12 +1,14 @@
+local tab_width = 4
+
 -- Sign/LineNr Column
 vim.opt.number = true
 vim.opt.relativenumber = true
 
 -- Tabs
 vim.opt.expandtab = true
-vim.opt.tabstop = 4
-vim.opt.softtabstop = 4
-vim.opt.shiftwidth = 4
+vim.opt.tabstop = tab_width
+vim.opt.softtabstop = tab_width
+vim.opt.shiftwidth = tab_width
 vim.opt.softtabstop = 0
 
 -- Text

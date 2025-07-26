@@ -8,6 +8,17 @@ require('nvim-treesitter.configs').setup {
     autotag = {
         enable = true,
     },
+    -- context_commentstring
+    -- Install the parsers for the languages you want to "comment" in
+    -- Here are the supported languages:
+    ensure_installed = {
+        'css', 'graphql', 'html', 'javascript', 'typescript',
+        'lua', 'prisma', 'php', 'python', 'scss', 'svelte', 'tsx',
+        'typescript', 'vim', 'vue',
+    },
+    context_commentstring = {
+        enable = true,
+    },
     textobjects = {
         select = {
             enable = true,
