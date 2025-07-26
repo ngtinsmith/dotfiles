@@ -6,11 +6,12 @@ Configuration files tracked with Git `--bare` repo.
 
 ## Table of Contents
 
-- [Setup](#setup)
+- [Installation](#installation)
     - [Install script](#install-script)
-    - [Usage](#usage)
+- [Usage](#usage)
+- [Todo](#todo)
 
-## Setup
+## Installation
 
 Personalised configuration steps based on Atlassian's Guide - [Dotfiles: Best Way to Store in a Bare Git Repository](https://www.atlassian.com/git/tutorials/dotfiles)
 
@@ -94,39 +95,6 @@ As a shortcut not to have to remember all these steps on any new machine you wan
 curl -o- https://raw.githubusercontent.com/ngtinsmith/dotfiles/macos/.bin/install.sh | bash
 ```
 
-
-`install.sh`
-
-```sh
-#!/bin/bash
-
-if [[ ! -s ~/.dotfiles ]]; then
-    mkdir ~/.dotfiles
-fi
-
-# prevent weird git repo recursion problems
-echo ".dotfiles" >> .gitignore
-
-git clone --bare git@github.com:ngtinsmith/dotfiles.git $HOME/.dotfiles
-
-function dotfiles {
-   /usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME $@
-}
-
-dotfiles checkout
-
-if [ $? = 0 ]; then
-    echo "Checked out dotfiles config.";
-  else
-    echo "Backing up pre-existing dotfiles.";
-    mkdir -p .dotfiles-backup
-    dotfiles checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | xargs -I{} mv {} .dotfiles-backup/{}
-fi;
-
-dotfiles checkout
-dotfiles config --local status.showUntrackedFiles no
-```
-
 ### Usage
 
 ```sh
@@ -144,3 +112,19 @@ dotfiles commit -m "add nvim init.lua and lua modules"
 dotfiles push
 ```
 
+### Todo
+
+- add steps:
+  - rename "dotfiles" git bare config name and email
+  - add ssh key auth 
+- move `install.sh` to `.config`, `.local`, somewhere that already exists and won't pollute $HOME
+- improve install-script pre-requisite packages automation
+  - brew
+  - fzf
+  - rg
+  - ohmyzsh
+  - nvm
+  - node
+  - neovim
+    - cmake (brew)
+    - npm global packages
