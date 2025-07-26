@@ -1,6 +1,6 @@
 vim.diagnostic.config({
     float = {
-        focusable = false,
+        focusable = true,
         prefix = function(diagnostic)
             if diagnostic.code ~= nil then
                 return string.format('(%s) ', type(diagnostic.code) == 'number'
