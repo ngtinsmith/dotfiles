@@ -26,4 +26,5 @@ vim.diagnostic.config({
             [vim.diagnostic.severity.INFO] = icons.circle,
         },
     },
+    virtual_text = false
 })

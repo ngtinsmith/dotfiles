@@ -98,46 +98,47 @@ end
 -- @param #string search_keyword - String to search
 function M.search_file_contents(project_name, search_keyword)
     local project = vim.g.user_projects[project_name]
-
     if not project then
         vim.notify(
             string.format('"%s" doesn\'t exist in `vim.g.user_projects` global', project_name),
             vim.log.levels.ERROR
         )
-
         return
     end
 
-    local rg_ignore = M.create_ignored_globs(project.ignore, project.ignore_files)
-    local rg_args = {
-        '--column',
-        '--line-number',
-        '--no-heading',
-        '--color=always',
-        '--smart-case',
-        '--hidden',
-        rg_ignore,
-    }
+    -- Build your ignore globs as separate args
+    local rg_ignore = {}
+    if project.ignore then
+        vim.list_extend(rg_ignore, { "-g", project.ignore })
+    end
+    if project.ignore_files then
+        vim.list_extend(rg_ignore, { "-g", project.ignore_files })
+    end
 
-    local rg_command = string.format('rg %s', table.concat(rg_args, ' '))
-
-    fzf.fzf_live(function(query)
-        -- pre-escape parenthesis for shell command
-        local escaped_query_parens = vim.fn.escape(query, '{}[]()')
-
-        return rg_command .. ' -- ' .. vim.fn.shellescape(escaped_query_parens)
-    end, {
-        query = search_keyword,
+    fzf.live_grep({
+        -- Let fzf-lua handle the core live_grep behavior
+        cmd = "rg",
         cwd = project.path,
-        prompt = string.format('Grep %s: ', project.path),
+        prompt = string.format("%s: ", project.path),
+        query = search_keyword,
+        -- Merge in your custom ripgrep args
+        rg_opts = table.concat({
+            "--column",
+            "--line-number",
+            "--no-heading",
+            "--color=always",
+            "--smart-case",
+            "--hidden",
+            unpack(rg_ignore),
+        }, " "),
         actions = fzf.defaults.actions.files,
         file_icons = true,
         color_icons = true,
-        previewer = 'builtin',
+        previewer = "builtin",
+        -- fzf_opts from your old setup
         fzf_opts = {
-            ['--phony'] = '',
-            ['--reverse'] = '',
-            ['--inline-info'] = '',
+            ["--reverse"] = "",
+            ["--inline-info"] = "",
         },
     })
 end

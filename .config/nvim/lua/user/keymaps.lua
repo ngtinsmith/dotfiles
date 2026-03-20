@@ -1,7 +1,7 @@
 local map = vim.keymap.set
 local utils = require('user/utils')
 local fzf_user = require('user/plugins/fzf')
-
+local fzf = require('fzf-lua')
 
 -- =============================================================================
 -- Defaults
@@ -122,3 +122,4 @@ map('x', '*', utils.search_in_place)
 
 map('n', '<Leader>d', fzf_user.open_fzf_buffers)
 map('n', '<Leader>hh', fzf_user.open_fzf_files)
+map('n', '<Leader>yr', fzf.resume)
