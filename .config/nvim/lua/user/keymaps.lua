@@ -70,7 +70,7 @@ map('n', '<Leader>sh>', ':sus<CR>')
 -- this works because vim registers <C-/> as <C-_>
 -- plugin: comment.nvim
 map('n', '<C-_>', 'gcc', { remap = true })
-map('v', '<C-_>', 'gc', { remap = true })
+map('v', '<C-_>', 'gcgv', { remap = true })
 
 -- Retain "p" register when pasting over a selection
 map('v', '<Leader>p', '_dP')
@@ -83,7 +83,7 @@ local bufopts = { silent = true }
 
 local conform_fmt = function()
     local buf = vim.api.nvim_get_current_buf()
-    require("conform").format({ bufnr = buf, async = true })
+    require('conform').format({ bufnr = buf, async = true })
 end
 
 map('n', 'gD', vim.lsp.buf.declaration, bufopts)
@@ -95,8 +95,6 @@ map('n', 'g0', vim.lsp.buf.document_symbol, bufopts)
 map('n', 'gW', vim.lsp.buf.workspace_symbol, bufopts)
 map('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
 map('n', 'gl', vim.diagnostic.open_float, bufopts)
-map('n', '[d', vim.diagnostic.goto_prev, bufopts)
-map('n', ']d', vim.diagnostic.goto_next, bufopts)
 map('n', '<leader>td', vim.lsp.buf.type_definition, bufopts)
 map('n', '<leader>ca', ':FzfLua lsp_code_actions<CR>', bufopts)
 map('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, bufopts)

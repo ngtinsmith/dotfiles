@@ -26,7 +26,6 @@ autocmd('BufWritePost', {
     end,
 })
 
-
 autocmd({ 'BufRead', 'BufNewFile' }, {
     group = aliases_filetype,
     pattern = '*.aliases',

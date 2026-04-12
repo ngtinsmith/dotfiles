@@ -1,4 +1,5 @@
 #!/bin/sh
+# TODO: refactor, use http for cloning
 
 if [[ ! -s ~/.dotfiles ]]; then
     mkdir "~/.dotfiles"
