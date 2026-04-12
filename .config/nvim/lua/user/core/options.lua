@@ -1,3 +1,5 @@
+vim.g.editorconfig = true
+
 -- Sign/LineNr Column
 vim.opt.number = true
 vim.opt.relativenumber = true
