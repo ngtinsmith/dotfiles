@@ -104,8 +104,7 @@ map('n', '<leader>wl', function()
 end, bufopts)
 
 map('n', '<leader>f', conform_fmt, bufopts)
-map('v', '<leader>f', ':Format<CR>', bufopts) -- conform custom `:Format`
--- map('v', '<leader>f', conform_fmt, bufopts)
+map('v', '<leader>f', ':Format<CR>', bufopts)
 
 -- =============================================================================
 -- Searching
