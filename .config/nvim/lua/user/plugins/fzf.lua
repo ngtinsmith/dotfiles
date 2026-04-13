@@ -1,9 +1,30 @@
-local home_path = os.getenv('HOME')
 local fzf = require('fzf-lua')
+
+-- TODO: fzf configure code_actions previewer and
+-- window config
+require('fzf-lua').setup({
+    lsp = {
+        code_actions = {
+            previewer = false,
+            -- preview_pager = [[ delta --hunk-header-style="omit" --file-style="omit" --width=$FZF_PREVIEW_COLUMNS ]],
+            winopts = {
+                border = 'rounded',
+                preview = {
+                    scrollbar = false,
+                    layout = 'vertical',
+                    width = 0.5,
+                    height = 0.5,
+                    vertical = 'down:75%',
+                }
+            }
+        }
+    }
+})
 
 local M = {}
 
-M.base_ignore = '"!{.git,node_modules,build,dist}/**"'
+M.base_ignore = '"!**/{.git,.yarn,.github,.hygen,.vscode,node_modules,build,dist}/**"'
+M.base_ignore_files = '"!{yarn.lock,package-lock.json}"'
 
 function M.open_fzf_buffers()
     fzf.buffers({
@@ -31,32 +52,24 @@ end
 -- @param #string project_name - Project name in `vim.g.user_projects` table
 function M.search_project_file(project_name)
     local project = vim.g.user_projects[project_name]
+    if not project then return end
 
-    if not project then
-        vim.notify(
-            string.format('"%s" doesn\'t exist in `vim.g.user_projects` global', project_name),
-            vim.log.levels.ERROR
-        )
+    local path = project.path:gsub('^~', os.getenv('HOME'))
 
-        return
-    end
-
-    local rg_ignore = string.format('--glob %s', project.ignore)
-    local rg_files = string.format('--hidden --files -- %s', project.path)
-    local rg_args = string.format('%s %s', rg_ignore, rg_files)
-    local rg_command = string.format('rg --no-require-git %s', rg_args)
-
-    fzf.fzf_exec(rg_command, {
-        prompt = string.format('Files (%s): ', project.label),
-        actions = fzf.defaults.actions.files,
+    fzf.files({
+        cwd = path,
+        prompt = string.format('%s> ', project.label or project.name),
+        -- We pass the flags as a string; fzf-lua handles the execution
+        cmd = string.format('rg --files --hidden --no-require-git -g %s -g %s',
+            project.ignore, project.ignore_files),
         fzf_opts = {
-            ['--with-nth'] = '-3..',
-            ['--reverse'] = '',
-            ['--inline-info'] = '',
+            ['--tiebreak'] = 'length',
+            -- TODO: c-g doesn't work
+            ['--bind'] = 'ctrl-g:toggle-fuzzy',
         },
-        fn_transform = function(line)
-            return string.gsub(line, home_path or '', '~')
-        end
+        -- This prevents the "multiprocess" error while keeping icons
+        file_icons = true,
+        color_icons = true,
     })
 end
 
@@ -66,44 +79,45 @@ end
 -- @param #string search_keyword - String to search
 function M.search_file_contents(project_name, search_keyword)
     local project = vim.g.user_projects[project_name]
-
     if not project then
         vim.notify(
             string.format('"%s" doesn\'t exist in `vim.g.user_projects` global', project_name),
             vim.log.levels.ERROR
         )
-
         return
     end
 
-    local rg_ignore = string.format('--glob %s', project.ignore)
-    local rg_args = {
-        '--column',
-        '--line-number',
-        '--no-heading',
-        '--color=always',
-        '--smart-case',
-        '--hidden',
-        rg_ignore,
-    }
+    -- Build your ignore globs as separate args
+    local rg_ignore = {}
+    if project.ignore then
+        vim.list_extend(rg_ignore, { '-g', project.ignore })
+    end
+    if project.ignore_files then
+        vim.list_extend(rg_ignore, { '-g', project.ignore_files })
+    end
 
-    local rg_command = string.format('rg %s', table.concat(rg_args, ' '))
-
-    fzf.fzf_live(function(query)
-        -- pre-escape parenthesis for shell command
-        local escaped_query_parens = vim.fn.escape(query, '{}[]()')
-
-        return rg_command .. ' -- ' .. vim.fn.shellescape(escaped_query_parens)
-    end, {
-        query = search_keyword,
+    fzf.live_grep({
+        -- Let fzf-lua handle the core live_grep behavior
+        cmd = 'rg',
         cwd = project.path,
-        prompt = string.format('Grep %s: ', project.path),
+        prompt = string.format('%s: ', project.path),
+        query = search_keyword,
+        -- Merge in your custom ripgrep args
+        rg_opts = table.concat({
+            '--column',
+            '--line-number',
+            '--no-heading',
+            '--color=always',
+            '--smart-case',
+            '--hidden',
+            unpack(rg_ignore),
+        }, ' '),
         actions = fzf.defaults.actions.files,
         file_icons = true,
         color_icons = true,
         previewer = 'builtin',
+        -- fzf_opts from your old setup
         fzf_opts = {
-            ['--phony'] = '',
             ['--reverse'] = '',
             ['--inline-info'] = '',
         },

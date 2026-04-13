@@ -1,14 +1,15 @@
-local tab_width = 4
+vim.g.editorconfig = true
 
 -- Sign/LineNr Column
 vim.opt.number = true
 vim.opt.relativenumber = true
+vim.opt.cursorline = true
 
 -- Tabs
 vim.opt.expandtab = true
-vim.opt.tabstop = tab_width
-vim.opt.softtabstop = tab_width
-vim.opt.shiftwidth = tab_width
+vim.opt.tabstop = 2
+vim.opt.softtabstop = 2
+vim.opt.shiftwidth = 2
 vim.opt.softtabstop = 0
 
 -- Text
@@ -20,7 +21,7 @@ vim.opt.showmatch = true
 -- Window
 vim.opt.splitright = true
 vim.opt.splitbelow = true
-vim.opt.shortmess:append('c')
+vim.opt.shortmess = vim.opt.shortmess + 'c'
 vim.opt.laststatus = 3
 vim.opt.signcolumn = 'number'
 vim.opt.clipboard = 'unnamedplus'

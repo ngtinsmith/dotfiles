@@ -1,23 +1,38 @@
+-- TODO: replace with lazydev
 require('neodev').setup({})
 
-local lspconfig = require('lspconfig')
 local cmp = require('cmp_nvim_lsp')
 local capabilities = cmp.default_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 -- =============================================================================
 -- Enable borders for hover/signature help
 
-vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(
-    vim.lsp.handlers.hover, { border = 'rounded' }
-)
-vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(
-    vim.lsp.handlers.signature_help, { border = 'rounded' }
-)
+vim.lsp.config('*', {
+    capabilities = capabilities,
+    -- This adds rounded borders to ALL floating windows (hover, signature, etc.)
+    window = {
+        hover = { border = 'rounded' },
+        signature_help = { border = 'rounded' },
+    },
+})
 
 -- =============================================================================
--- LSP Servers
+-- Keymaps
 
-local M = {}
+vim.api.nvim_create_autocmd('LspAttach', {
+    callback = function(args)
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        if not client then return end
+
+        if client.server_capabilities.renameProvider then
+            vim.keymap.set('n', '<F2>', vim.lsp.buf.rename, { buffer = args.buf, silent = true })
+        end
+    end,
+})
+
+-- =============================================================================
+-- Servers
 
 local uname = vim.loop.os_uname().sysname
 local lua_ls_cmd = uname == 'Darwin'
@@ -28,45 +43,27 @@ local lua_ls_cmd = uname == 'Darwin'
 
 local servers = {
     cssls = {},
-    -- emmet_ls = {},
+    tailwindcss = {},
+    eslint = {},
     emmet_language_server = {},
-    tsserver = {},
-    vimls = {},
+    svelte = {},
     volar = {},
-    -- tailwindcss = {
-    --     settings = {
-    --         tailwindCSS = {
-    --             classAttributes = { 'class', 'className', 'classList', 'ngClass', '.*Classes' },
-    --             -- experimental = {
-    --             --     classRegex = {
-    --             --         'Classes \\=([^;]*);', "'([^']*)'",
-    --             --         'Classes \\=([^;]*);', '\"([^\"]*)\"',
-    --             --         'Classes \\=([^;]*);', '\\`([^\\`]*)\\`',
-    --             --         ":\\s*?[\"'`]([^\"'`]*).*?,",
-    --             --         '([a-zA-Z0-9\\-:]+)'
-    --             --     }
-    --             -- }
-    --         },
-    --     }
-    -- },
-    prismals = {},
+    vimls = {},
     lua_ls = {
         cmd = { lua_ls_cmd },
         filetypes = { 'lua' },
         settings = {
             Lua = {
-                runtime = {
-                    version = 'LuaJIT',
-                },
+                runtime = { version = 'LuaJIT' },
                 diagnostics = {
                     globals = { 'vim' },
-                    neededFileStatus = {
-                        ['codestyle-check'] = 'Any'
-                    }
+                    neededFileStatus = { ['codestyle-check'] = 'Any' }
                 },
                 workspace = {
                     library = vim.api.nvim_get_runtime_file('', true),
                     checkThirdParty = false,
+                    -- help lua_ls find .editorconfig
+                    userConfigSearch = true,
                 },
                 telemetry = {
                     enable = false,
@@ -86,45 +83,9 @@ local servers = {
 }
 
 -- =============================================================================
--- LSP Hooks
-
-M.on_attach = function(client, bufnr)
-    capabilities.textDocument.completion.completionItem.snippetSupport = true
-
-    if client.supports_method('textDocument/formatting') then
-        local lsp_formatting = vim.api.nvim_create_augroup('LspFormatting', {})
-
-        vim.api.nvim_clear_autocmds({ group = lsp_formatting, buffer = bufnr })
-        -- vim.api.nvim_create_autocmd('BufWritePre', {
-        --     desc = 'Auto-format current buffer on (before) save',
-        --     group = lsp_formatting,
-        --     buffer = bufnr,
-        --     callback = function()
-        --         vim.lsp.buf.format({ bufnr = bufnr })
-        --     end,
-        -- })
-    end
-
-    if client.server_capabilities.renameProvider then
-        vim.keymap.set('n', '<F2>', vim.lsp.buf.rename, { silent = true })
-    end
-end
-
-
-local create_default_config = function()
-    return {
-        capabilities = capabilities,
-        on_attach = M.on_attach
-    }
-end
-
--- =============================================================================
 -- Setup Servers
 
 for server, config in pairs(servers) do
-    local _config = vim.tbl_deep_extend('force', config, create_default_config())
-
-    lspconfig[server].setup(_config)
+    vim.lsp.config(server, config)
+    vim.lsp.enable(server)
 end
-
-return M

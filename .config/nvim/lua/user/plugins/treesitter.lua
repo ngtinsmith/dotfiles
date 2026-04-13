@@ -1,4 +1,4 @@
-require('nvim-treesitter.configs').setup {
+require('nvim-treesitter').setup {
     highlight = {
         enable = true,
     },
@@ -44,7 +44,7 @@ require('nvim-treesitter.configs').setup {
             -- mapping query_strings to modes.
             selection_modes = {
                 ['@parameter.outer'] = 'v', -- charwise
-                ['@function.outer'] = 'V', -- linewise
+                ['@function.outer'] = 'V',  -- linewise
                 ['@class.outer'] = '<c-v>', -- blockwise
             },
             -- If you set this to `true` (default is `false`) then any textobject is
@@ -67,5 +67,12 @@ require('nvim-treesitter.configs').setup {
                 ['<leader>A'] = '@parameter.inner',
             },
         },
+    },
+    -- Install the parsers for the languages you want to comment in
+    -- Here are the supported languages:
+    ensure_installed = {
+        'astro', 'css', 'glimmer', 'graphql', 'html', 'javascript',
+        'lua', 'nix', 'php', 'python', 'scss', 'svelte', 'tsx', 'twig',
+        'typescript', 'vim', 'vue',
     },
 }

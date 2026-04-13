@@ -1,22 +1,45 @@
+local ensure_packer = function()
+    local fn = vim.fn
+    local install_path = fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
+
+    if fn.empty(fn.glob(install_path)) > 0 then
+        fn.system({
+            'git',
+            'clone',
+            '--depth',
+            '1',
+            'https://github.com/wbthomason/packer.nvim',
+            install_path,
+        })
+        vim.cmd([[packadd packer.nvim]])
+        return true
+    end
+
+    return false
+end
+
+local packer_bootstrap = ensure_packer()
+
 require('packer').startup(function(use)
-    use 'wbthomason/packer.nvim'
+    use { 'wbthomason/packer.nvim' }
 
     -- Session
 
-    use { 'rmagatti/auto-session',
+    use {
+        'rmagatti/auto-session',
         config = function()
             require('auto-session').setup {
                 log_level = 'error',
-                auto_session_suppress_dirs = { '~/', '~/projects', '~/Downloads', '/' },
+                suppress_dirs = { '~/', '~/projects', '~/Downloads', '/' },
             }
         end,
         pre_save_cmds = {
             function()
-                print('pre save cmds')
+                require('neo-tree').close('filesystem')
             end,
             function()
-                require('neo-tree').close('filesystem')
-            end
+                vim.cmd.normal({ ':DiffviewClose<CR>', bang = true })
+            end,
         },
         cwd_change_handling = {
             post_cwd_changed_hook = function()
@@ -47,54 +70,83 @@ require('packer').startup(function(use)
             'nvim-lua/plenary.nvim',
             'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
             'MunifTanjim/nui.nvim',
-            {
-                -- only needed if you want to use the commands with "_with_window_picker" suffix
-                's1n7ax/nvim-window-picker',
-                tag = 'v1.*',
-                config = function()
-                    require 'window-picker'.setup({
-                        autoselect_one = true,
-                        include_current = false,
-                        filter_rules = {
-                            -- filter using buffer options
-                            bo = {
-                                -- if the file type is one of following, the window will be ignored
-                                filetype = { 'neo-tree', 'neo-tree-popup', 'notify' },
+        },
+        config = function()
+            vim.keymap.set('n', '<C-b>', ':Neotree toggle action=show<CR>', { silent = true })
 
-                                -- if the buffer type is one of following, the window will be ignored
-                                buftype = { 'terminal', 'quickfix' },
-                            },
+            require('neo-tree').setup({
+                filesystem = {
+                    follow_current_file = {
+                        enabled = true,
+                        leave_dirs_open = true,
+                    },
+                },
+            })
+        end
+    }
+
+    use {
+        'luukvbaal/statuscol.nvim',
+        config = function()
+            local builtin = require('statuscol.builtin')
+
+            require('statuscol').setup({
+                relculright = true,
+                ft_ignore = { 'neo-tree', 'neotree', 'DiffviewFiles' },
+                segments = {
+                    {
+                        sign = {
+                            namespace = { 'diagnostic/signs' }
                         },
-                        other_win_hl_color = '#e35e4f',
-                    })
-                end,
-            }
-        }
+                        click = 'v:lua.ScSa'
+                    },
+                    {
+                        text = { builtin.lnumfunc, ' ' },
+                        click = 'v:lua.ScLa',
+                    },
+                    {
+                        sign = { namespace = { 'gitsigns' } },
+                        click = 'v:lua.ScSa'
+                    },
+                }
+            })
+        end
     }
 
     -- FZF
 
-    use { 'ibhagwan/fzf-lua',
-        requires = { 'nvim-tree/nvim-web-devicons' }
-    }
+    use { 'ibhagwan/fzf-lua', requires = { 'nvim-tree/nvim-web-devicons' } }
 
     -- Docs
 
-    use({ 'iamcco/markdown-preview.nvim',
-        run = 'cd app && npm install',
-        setup = function() vim.g.mkdp_filetypes = { 'markdown' } end,
-        ft = { 'markdown' }
-    })
+    use {
+        'toppair/peek.nvim',
+        run = 'deno task --quiet build:fast',
+        config = function()
+            require('peek').setup()
+            vim.api.nvim_create_user_command('PeekOpen', require('peek').open, {})
+            vim.api.nvim_create_user_command('PeekClose', require('peek').close, {})
+        end,
+    }
 
     -- LSP
 
     use 'neovim/nvim-lspconfig'
     use 'folke/neodev.nvim'
-
-    -- Rust
-
-    use 'simrat39/rust-tools.nvim'
-    use 'mfussenegger/nvim-dap'
+    use {
+        'pmizio/typescript-tools.nvim',
+        requires = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+        config = function()
+            require('typescript-tools').setup {
+                settings = {
+                    tsserver_plugins = {
+                        '@vue/typescript-plugin',
+                    },
+                },
+                filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' }
+            }
+        end,
+    }
 
     -- Completion
 
@@ -113,10 +165,8 @@ require('packer').startup(function(use)
 
     use {
         'nvim-treesitter/nvim-treesitter',
-        run = function()
-            local ts_update = require('nvim-treesitter.install').update({ with_sync = true })
-            ts_update()
-        end,
+        branch = 'main', -- or 'main' depending on your current pull
+        run = ':TSUpdate'
     }
     use { 'nvim-treesitter/nvim-treesitter-textobjects' }
 
@@ -126,12 +176,127 @@ require('packer').startup(function(use)
         'sindrets/diffview.nvim',
         requires = 'nvim-lua/plenary.nvim'
     }
-    use 'lewis6991/gitsigns.nvim'
+    use {
+        'lewis6991/gitsigns.nvim',
+        config = function()
+            require('gitsigns').setup({
+                current_line_blame = true,
+                on_attach = function(bufnr)
+                    local gitsigns = require('gitsigns')
+
+                    local function map(mode, l, r, opts)
+                        opts = opts or {}
+                        opts.buffer = bufnr
+                        vim.keymap.set(mode, l, r, opts)
+                    end
+
+                    -- Navigation
+                    map('n', ']c', function()
+                        if vim.wo.diff then
+                            vim.cmd.normal({ ']c', bang = true })
+                        else
+                            gitsigns.nav_hunk('next')
+                        end
+                    end)
+
+                    map('n', '[c', function()
+                        if vim.wo.diff then
+                            vim.cmd.normal({ '[c', bang = true })
+                        else
+                            gitsigns.nav_hunk('prev')
+                        end
+                    end)
+
+                    -- Actions
+                    map('n', '<leader>hs', gitsigns.stage_hunk)
+                    map('n', '<leader>hr', gitsigns.reset_hunk)
+
+                    map('v', '<leader>hs', function()
+                        gitsigns.stage_hunk({ vim.fn.line('.'), vim.fn.line('v') })
+                    end)
+
+                    map('v', '<leader>hr', function()
+                        gitsigns.reset_hunk({ vim.fn.line('.'), vim.fn.line('v') })
+                    end)
+
+                    map('n', '<leader>hS', gitsigns.stage_buffer)
+                    map('n', '<leader>hR', gitsigns.reset_buffer)
+                    map('n', '<leader>hp', gitsigns.preview_hunk)
+                    map('n', '<leader>hi', gitsigns.preview_hunk_inline)
+
+                    map('n', '<leader>hb', function()
+                        gitsigns.blame_line({ full = true })
+                    end)
+
+                    map('n', '<leader>hd', gitsigns.diffthis)
+
+                    map('n', '<leader>hD', function()
+                        gitsigns.diffthis('~')
+                    end)
+
+                    map('n', '<leader>hQ', function() gitsigns.setqflist('all') end)
+                    map('n', '<leader>hq', gitsigns.setqflist)
+
+                    -- Toggles
+                    map('n', '<leader>tb', gitsigns.toggle_current_line_blame)
+                    map('n', '<leader>td', gitsigns.toggle_deleted)
+                    map('n', '<leader>tw', gitsigns.toggle_word_diff)
+
+                    -- Text object
+                    map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
+                end
+            })
+        end,
+    }
 
     -- Utils
 
     use { 'nvim-lua/plenary.nvim' }
-    use { 'jose-elias-alvarez/null-ls.nvim' }
+    use { 'mfussenegger/nvim-lint' }
+
+    --[[
+
+    TODO(conform):
+
+    fix range formatting on lua files or in general
+    current languages with inconsistent behavior
+        lua
+        typescript
+        css / scss
+    possible conflict with lua ls or range selection / selection leave
+
+    --]]
+    use({
+        'stevearc/conform.nvim',
+        config = function()
+            require('conform').setup({
+                formatters_by_ft = {
+                    javascript = { 'prettier' },
+                    javascriptreact = { 'prettier' },
+                    typescript = { 'prettier' },
+                    typescriptreact = { 'prettier' },
+                    css = { 'prettier' },
+                    scss = { 'prettier' },
+                    json = { 'prettier' },
+                },
+                default_format_opts = {
+                    lsp_format = 'fallback',
+                },
+            })
+
+            vim.api.nvim_create_user_command('Format', function(args)
+                local range = nil
+                if args.count ~= -1 then
+                    local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
+                    range = {
+                        start = { args.line1, 0 },
+                        ['end'] = { args.line2, end_line:len() },
+                    }
+                end
+                require('conform').format({ async = true, lsp_fallback = true, range = range })
+            end, { range = true })
+        end,
+    })
     use {
         'kylechui/nvim-surround',
         tag = '*', -- Use for stability; omit to use `main` branch for the latest features
@@ -148,10 +313,35 @@ require('packer').startup(function(use)
         end
     }
     use { 'windwp/nvim-ts-autotag' }
-    use { 'windwp/nvim-autopairs',
+    use {
+        'windwp/nvim-autopairs',
         config = function()
             require('nvim-autopairs').setup {}
         end
     }
-    use { 'JoosepAlviste/nvim-ts-context-commentstring', }
+
+    use { 'https://gitlab.com/schrieveslaach/sonarlint.nvim' }
+
+    -- use {
+    --     'Exafunction/codeium.vim',
+    --     config = function()
+    --         -- Change '<C-g>' here to any keycode you like.
+    --         vim.keymap.set('i', '<C-g>', function()
+    --             return vim.fn['codeium#Accept']()
+    --         end, { expr = true, silent = true })
+    --         vim.keymap.set('i', '<c-;>', function()
+    --             return vim.fn['codeium#CycleCompletions'](1)
+    --         end, { expr = true, silent = true })
+    --         vim.keymap.set('i', '<c-,>', function()
+    --             return vim.fn['codeium#CycleCompletions'](-1)
+    --         end, { expr = true, silent = true })
+    --         vim.keymap.set('i', '<C-x>', function()
+    --             return vim.fn['codeium#Clear']()
+    --         end, { expr = true, silent = true })
+    --     end,
+    -- }
+
+    if packer_bootstrap then
+        require('packer').sync()
+    end
 end)
