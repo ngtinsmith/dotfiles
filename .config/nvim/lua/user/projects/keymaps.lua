@@ -76,9 +76,7 @@ function M.setup(cfg)
         user_projects[name] = project
         table.insert(project_names, name)
 
-        local lhs_search_files = name == config.primary_names.main
-            and '<C-p>'
-            or '<leader>p' .. id
+        local lhs_search_files = '<leader>p' .. id
 
         -- Bind: Search files
 
@@ -105,6 +103,22 @@ function M.setup(cfg)
             fzf_user.search_file_contents(name, vim.fn.getreg('v'))
         end, { noremap = true })
     end
+
+    -- <leader>rp: search file contents in current working directory
+
+    map('n', '<leader>rp', function()
+        fzf_user.search_cwd_contents()
+    end, { noremap = true, silent = true })
+
+    map('v', '<leader>rp', function()
+        vim.api.nvim_feedkeys('"vy', 'nx', true)
+        fzf_user.search_cwd_contents(vim.fn.getreg('v'))
+    end, { noremap = true })
+
+    -- <C-p>: search files in current working directory
+    map('n', '<C-p>', function()
+        fzf_user.search_cwd_files()
+    end, { noremap = true, silent = true })
 
     -- Globals
 

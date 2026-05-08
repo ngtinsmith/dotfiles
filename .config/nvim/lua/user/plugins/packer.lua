@@ -115,7 +115,10 @@ require('packer').startup(function(use)
 
     -- FZF
 
-    use { 'ibhagwan/fzf-lua', requires = { 'nvim-tree/nvim-web-devicons' } }
+    use {
+        'ibhagwan/fzf-lua',
+        requires = { 'nvim-tree/nvim-web-devicons' },
+    }
 
     -- Docs
 
@@ -138,12 +141,7 @@ require('packer').startup(function(use)
         requires = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
         config = function()
             require('typescript-tools').setup {
-                settings = {
-                    tsserver_plugins = {
-                        '@vue/typescript-plugin',
-                    },
-                },
-                filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' }
+                filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' }
             }
         end,
     }
@@ -165,10 +163,27 @@ require('packer').startup(function(use)
 
     use {
         'nvim-treesitter/nvim-treesitter',
-        branch = 'main', -- or 'main' depending on your current pull
+        branch = 'main',
         run = ':TSUpdate'
     }
-    use { 'nvim-treesitter/nvim-treesitter-textobjects' }
+    use {
+        'nvim-treesitter/nvim-treesitter-textobjects',
+        branch = 'main',
+        init = function()
+            -- Disable entire built-in ftplugin mappings to avoid conflicts.
+            -- See https://github.com/neovim/neovim/tree/master/runtime/ftplugin for built-in ftplugins.
+            vim.g.no_plugin_maps = true
+
+            -- Or, disable per filetype (add as you like)
+            -- vim.g.no_python_maps = true
+            -- vim.g.no_ruby_maps = true
+            -- vim.g.no_rust_maps = true
+            -- vim.g.no_go_maps = true
+        end,
+        config = function()
+            -- put your config here
+        end,
+    }
 
     -- Git
 
@@ -266,37 +281,7 @@ require('packer').startup(function(use)
     possible conflict with lua ls or range selection / selection leave
 
     --]]
-    use({
-        'stevearc/conform.nvim',
-        config = function()
-            require('conform').setup({
-                formatters_by_ft = {
-                    javascript = { 'prettier' },
-                    javascriptreact = { 'prettier' },
-                    typescript = { 'prettier' },
-                    typescriptreact = { 'prettier' },
-                    css = { 'prettier' },
-                    scss = { 'prettier' },
-                    json = { 'prettier' },
-                },
-                default_format_opts = {
-                    lsp_format = 'fallback',
-                },
-            })
-
-            vim.api.nvim_create_user_command('Format', function(args)
-                local range = nil
-                if args.count ~= -1 then
-                    local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
-                    range = {
-                        start = { args.line1, 0 },
-                        ['end'] = { args.line2, end_line:len() },
-                    }
-                end
-                require('conform').format({ async = true, lsp_fallback = true, range = range })
-            end, { range = true })
-        end,
-    })
+    use({ 'stevearc/conform.nvim' })
     use {
         'kylechui/nvim-surround',
         tag = '*', -- Use for stability; omit to use `main` branch for the latest features
@@ -306,12 +291,6 @@ require('packer').startup(function(use)
             })
         end
     }
-    use {
-        'numToStr/Comment.nvim',
-        config = function()
-            require('Comment').setup()
-        end
-    }
     use { 'windwp/nvim-ts-autotag' }
     use {
         'windwp/nvim-autopairs',
@@ -319,27 +298,14 @@ require('packer').startup(function(use)
             require('nvim-autopairs').setup {}
         end
     }
+    use {
+        'JoosepAlviste/nvim-ts-context-commentstring',
+        config = function()
+            require('ts_context_commentstring').setup {}
+        end
+    }
 
     use { 'https://gitlab.com/schrieveslaach/sonarlint.nvim' }
-
-    -- use {
-    --     'Exafunction/codeium.vim',
-    --     config = function()
-    --         -- Change '<C-g>' here to any keycode you like.
-    --         vim.keymap.set('i', '<C-g>', function()
-    --             return vim.fn['codeium#Accept']()
-    --         end, { expr = true, silent = true })
-    --         vim.keymap.set('i', '<c-;>', function()
-    --             return vim.fn['codeium#CycleCompletions'](1)
-    --         end, { expr = true, silent = true })
-    --         vim.keymap.set('i', '<c-,>', function()
-    --             return vim.fn['codeium#CycleCompletions'](-1)
-    --         end, { expr = true, silent = true })
-    --         vim.keymap.set('i', '<C-x>', function()
-    --             return vim.fn['codeium#Clear']()
-    --         end, { expr = true, silent = true })
-    --     end,
-    -- }
 
     if packer_bootstrap then
         require('packer').sync()

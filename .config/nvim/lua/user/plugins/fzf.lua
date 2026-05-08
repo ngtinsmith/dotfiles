@@ -47,6 +47,24 @@ function M.open_fzf_files()
     })
 end
 
+--- Search files in the current working directory
+function M.search_cwd_files()
+    local cwd = vim.fn.getcwd()
+    fzf.files({
+        cwd = cwd,
+        prompt = string.format('%s> ', vim.fn.fnamemodify(cwd, ':~')),
+        cmd = string.format('rg --files --hidden --no-require-git -g %s -g %s',
+            M.base_ignore, M.base_ignore_files),
+        fzf_opts = {
+            ['--reverse'] = '',
+            ['--inline-info'] = '',
+            ['--tiebreak'] = 'length',
+        },
+        file_icons = true,
+        color_icons = true,
+    })
+end
+
 --- Search files in project path
 --
 -- @param #string project_name - Project name in `vim.g.user_projects` table
@@ -73,6 +91,31 @@ function M.search_project_file(project_name)
     })
 end
 
+--- @param opts { cwd: string, ignore?: string, ignore_files?: string, prompt?: string, query?: string }
+local function run_live_grep(opts)
+    local rg_ignore = {}
+    if opts.ignore then vim.list_extend(rg_ignore, { '-g', opts.ignore }) end
+    if opts.ignore_files then vim.list_extend(rg_ignore, { '-g', opts.ignore_files }) end
+
+    fzf.live_grep({
+        cwd = opts.cwd,
+        prompt = opts.prompt or string.format('%s: ', vim.fn.fnamemodify(opts.cwd, ':~')),
+        query = opts.query,
+        rg_opts = table.concat({
+            '--column', '--line-number', '--no-heading',
+            '--color=always', '--smart-case', '--hidden',
+            unpack(rg_ignore),
+        }, ' '),
+        file_icons = true,
+        color_icons = true,
+        previewer = 'builtin',
+        fzf_opts = {
+            ['--reverse'] = '',
+            ['--inline-info'] = '',
+        },
+    })
+end
+
 --- Search file contents in project path
 --
 -- @param #string project_name - Project name in `vim.g.user_projects` table
@@ -87,40 +130,24 @@ function M.search_file_contents(project_name, search_keyword)
         return
     end
 
-    -- Build your ignore globs as separate args
-    local rg_ignore = {}
-    if project.ignore then
-        vim.list_extend(rg_ignore, { '-g', project.ignore })
-    end
-    if project.ignore_files then
-        vim.list_extend(rg_ignore, { '-g', project.ignore_files })
-    end
-
-    fzf.live_grep({
-        -- Let fzf-lua handle the core live_grep behavior
-        cmd = 'rg',
+    run_live_grep({
         cwd = project.path,
+        ignore = project.ignore,
+        ignore_files = project.ignore_files,
         prompt = string.format('%s: ', project.path),
         query = search_keyword,
-        -- Merge in your custom ripgrep args
-        rg_opts = table.concat({
-            '--column',
-            '--line-number',
-            '--no-heading',
-            '--color=always',
-            '--smart-case',
-            '--hidden',
-            unpack(rg_ignore),
-        }, ' '),
-        actions = fzf.defaults.actions.files,
-        file_icons = true,
-        color_icons = true,
-        previewer = 'builtin',
-        -- fzf_opts from your old setup
-        fzf_opts = {
-            ['--reverse'] = '',
-            ['--inline-info'] = '',
-        },
+    })
+end
+
+--- Search file contents in the current working directory
+--
+-- @param #string search_keyword - Optional string to pre-fill the query
+function M.search_cwd_contents(search_keyword)
+    run_live_grep({
+        cwd = vim.fn.getcwd(),
+        ignore = M.base_ignore,
+        ignore_files = M.base_ignore_files,
+        query = search_keyword,
     })
 end
 

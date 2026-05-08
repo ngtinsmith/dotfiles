@@ -7,9 +7,9 @@ vim.opt.cursorline = true
 
 -- Tabs
 vim.opt.expandtab = true
-vim.opt.tabstop = 2
-vim.opt.softtabstop = 2
-vim.opt.shiftwidth = 2
+vim.opt.tabstop = 4
+vim.opt.softtabstop = 4
+vim.opt.shiftwidth = 4
 vim.opt.softtabstop = 0
 
 -- Text
@@ -36,4 +36,4 @@ vim.opt.ttimeoutlen = 0
 vim.opt.listchars = 'tab:>-,trail:~,extends:>,precedes:<,space:.'
 
 -- Sessions
-vim.o.sessionoptions = 'blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions'
+vim.o.sessionoptions = "blank,buffers,folds,help,tabpages,winsize,winpos,terminal,localoptions"

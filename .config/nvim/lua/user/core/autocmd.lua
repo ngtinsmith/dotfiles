@@ -2,7 +2,6 @@ local autocmd = vim.api.nvim_create_autocmd
 local augroup = vim.api.nvim_create_augroup
 
 local yank = augroup('yank_highlight', { clear = true })
-local lua_modules = augroup('lua_modules', { clear = true })
 local aliases_filetype = augroup('aliases_filetype', { clear = true })
 local git_bare_dots = augroup('git_bare_dots', { clear = true })
 
@@ -14,16 +13,6 @@ autocmd('TextYankPost', {
             timeout = 150
         })
     end
-})
-
-autocmd('BufWritePost', {
-    group = lua_modules,
-    desc = 'Source lua files onChange and re-compile packer',
-    pattern = '*.lua',
-    callback = function(args)
-        dofile(args.file)
-        require('packer').compile()
-    end,
 })
 
 autocmd({ 'BufRead', 'BufNewFile' }, {

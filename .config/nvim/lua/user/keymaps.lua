@@ -69,8 +69,34 @@ map('n', '<Leader>sh>', ':sus<CR>')
 -- Comment keymap like in VSCode
 -- this works because vim registers <C-/> as <C-_>
 -- plugin: comment.nvim
-map('n', '<C-_>', 'gcc', { remap = true })
-map('v', '<C-_>', 'gcgv', { remap = true })
+
+-- TODO: export util
+local function set_local_commentstring()
+    local buf = vim.api.nvim_get_current_buf()
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    if not cursor then return end
+
+    local row, col = cursor[1], cursor[2]
+    local parser = vim.treesitter.get_parser(buf, nil, { error = false })
+    if not parser then return end
+
+    local lang_tree = parser:language_for_range({ row - 1, col, row - 1, col })
+    local lang = lang_tree:lang()
+    local cs = vim.filetype.get_option(lang, 'commentstring')
+    if cs then vim.bo.commentstring = cs end
+end
+
+map('n', '<C-_>', function()
+    set_local_commentstring()
+    return 'gcc'
+end, { expr = true, remap = true })
+
+map('v', '<C-_>', function()
+    set_local_commentstring()
+    return 'gcgv'
+end, { expr = true, remap = true })
+-- map('n', '<C-_>', 'gcc', { remap = true })
+-- map('v', '<C-_>', 'gcgv', { remap = true })
 
 -- Retain "p" register when pasting over a selection
 map('v', '<Leader>p', '_dP')

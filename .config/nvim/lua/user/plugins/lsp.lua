@@ -41,14 +41,44 @@ local lua_ls_cmd = uname == 'Darwin'
     -- built from source
     or vim.fn.fnamemodify('~/lua-language-server/bin/lua-language-server', ':p')
 
+-- TODO: export vue setup to file
+local vue_language_server_path = '/home/ng/.nvm/versions/node/v24.14.1/lib/node_modules/@vue/language-server'
+local vue_plugin = {
+    name = '@vue/typescript-plugin',
+    location = vue_language_server_path,
+    languages = { 'vue' },
+    configNamespace = 'typescript',
+}
+local vtsls_config = {
+    cmd = { '/home/ng/.nvm/versions/node/v24.14.1/bin/vtsls', '--stdio' },
+    settings = {
+        vtsls = {
+            tsserver = {
+                globalPlugins = {
+                    vue_plugin,
+                },
+            },
+        },
+    },
+    filetypes = { 'vue' },
+}
+
 local servers = {
     cssls = {},
     tailwindcss = {},
     eslint = {},
     emmet_language_server = {},
     svelte = {},
-    volar = {},
+    vue_ls = {
+        cmd = { '/home/ng/.nvm/versions/node/v24.14.1/bin/vue-language-server', '--stdio' },
+        init_options = {
+            typescript = {
+                tsdk = '/home/ng/.nvm/versions/node/v24.14.1/lib/node_modules/typescript/lib',
+            },
+        },
+    },
     vimls = {},
+    vtsls = vtsls_config,
     lua_ls = {
         cmd = { lua_ls_cmd },
         filetypes = { 'lua' },

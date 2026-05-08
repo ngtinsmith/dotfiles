@@ -3,76 +3,39 @@ require('nvim-treesitter').setup {
         enable = true,
     },
     indent = {
-        enable = true
-    },
-    autotag = {
         enable = true,
     },
-    -- context_commentstring
-    -- Install the parsers for the languages you want to "comment" in
-    -- Here are the supported languages:
     ensure_installed = {
-        'css', 'graphql', 'html', 'javascript', 'typescript',
-        'lua', 'prisma', 'php', 'python', 'scss', 'svelte', 'tsx',
-        'typescript', 'vim', 'vue',
+        'css', 'graphql', 'html', 'javascript',
+        'lua', 'php', 'scss', 'svelte', 'tsx',
+        'typescript', 'vue',
     },
-    context_commentstring = {
+}
+
+require('nvim-treesitter-textobjects').setup {
+    select = {
         enable = true,
-    },
-    textobjects = {
-        select = {
-            enable = true,
-
-            -- Automatically jump forward to textobj, similar to targets.vim
-            lookahead = true,
-
-            keymaps = {
-                -- You can use the capture groups defined in textobjects.scm
-                ['af'] = '@function.outer',
-                ['if'] = '@function.inner',
-                ['ac'] = '@class.outer',
-                -- You can optionally set descriptions to the mappings (used in the desc parameter of
-                -- nvim_buf_set_keymap) which plugins like which-key display
-                ['ic'] = { query = '@class.inner', desc = 'Select inner part of a class region' },
-            },
-            -- You can choose the select mode (default is charwise 'v')
-            --
-            -- Can also be a function which gets passed a table with the keys
-            -- * query_string: eg '@function.inner'
-            -- * method: eg 'v' or 'o'
-            -- and should return the mode ('v', 'V', or '<c-v>') or a table
-            -- mapping query_strings to modes.
-            selection_modes = {
-                ['@parameter.outer'] = 'v', -- charwise
-                ['@function.outer'] = 'V',  -- linewise
-                ['@class.outer'] = '<c-v>', -- blockwise
-            },
-            -- If you set this to `true` (default is `false`) then any textobject is
-            -- extended to include preceding or succeeding whitespace. Succeeding
-            -- whitespace has priority in order to act similarly to eg the built-in
-            -- `ap`.
-            --
-            -- Can also be a function which gets passed a table with the keys
-            -- * query_string: eg '@function.inner'
-            -- * selection_mode: eg 'v'
-            -- and should return true of false
-            include_surrounding_whitespace = true,
+        lookahead = true,
+        keymaps = {
+            ['af'] = '@function.outer',
+            ['if'] = '@function.inner',
+            ['ac'] = '@class.outer',
+            ['ic'] = { query = '@class.inner', desc = 'Select inner part of a class region' },
         },
-        swap = {
-            enable = true,
-            swap_next = {
-                ['<leader>a'] = '@parameter.inner',
-            },
-            swap_previous = {
-                ['<leader>A'] = '@parameter.inner',
-            },
+        selection_modes = {
+            ['@parameter.outer'] = 'v',
+            ['@function.outer'] = 'V',
+            ['@class.outer'] = '<c-v>',
         },
+        include_surrounding_whitespace = true,
     },
-    -- Install the parsers for the languages you want to comment in
-    -- Here are the supported languages:
-    ensure_installed = {
-        'astro', 'css', 'glimmer', 'graphql', 'html', 'javascript',
-        'lua', 'nix', 'php', 'python', 'scss', 'svelte', 'tsx', 'twig',
-        'typescript', 'vim', 'vue',
+    swap = {
+        enable = true,
+        swap_next = {
+            ['<leader>a'] = '@parameter.inner',
+        },
+        swap_previous = {
+            ['<leader>A'] = '@parameter.inner',
+        },
     },
 }

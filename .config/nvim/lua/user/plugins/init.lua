@@ -1,6 +1,7 @@
 require('user/plugins/packer')
 require('user/plugins/cmp')
 require('user/plugins/lsp')
+require('user/plugins/conform')
 require('user/plugins/lualine')
 require('user/plugins/fzf')
 require('user/plugins/treesitter')
