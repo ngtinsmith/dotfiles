@@ -111,22 +111,6 @@ export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 # Set up fzf key bindings and fuzzy completion
 source <(fzf --zsh)
 
-# Git Checkout
-fgc() {
-  local branches branch
-  branches=$(git --no-pager branch -vv) &&
-  branch=$(echo "$branches" | fzf +m) &&
-  git checkout $(echo "$branch" | awk '{print $1}' | sed "s/.* //")
-}
-
-# File search w/ ripgrep and expands argument(s) as path(s)
-fra() {
-  local files file
-  files=$(rg --files $*) &&
-  file=$(echo "$files" | fzf +m | sed 's/.*/"&"/')
-  [[ "$file" = "" ]] && return || echo "$file" | xargs nvim
-}
-
 # ==============================================================================
 # Kitty
 
