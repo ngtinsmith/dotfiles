@@ -1,5 +1,11 @@
 vim.g.editorconfig = true
 
+-- Themes
+vim.opt.termguicolors = true
+vim.opt.background = 'dark'
+vim.g.material_style = 'palenight'
+vim.cmd.colorscheme 'catppuccin-nvim'
+
 -- Sign/LineNr Column
 vim.opt.number = true
 vim.opt.relativenumber = true
@@ -36,4 +42,4 @@ vim.opt.ttimeoutlen = 0
 vim.opt.listchars = 'tab:>-,trail:~,extends:>,precedes:<,space:.'
 
 -- Sessions
-vim.o.sessionoptions = "blank,buffers,folds,help,tabpages,winsize,winpos,terminal,localoptions"
+vim.o.sessionoptions = 'blank,buffers,folds,help,tabpages,winsize,winpos,terminal,localoptions'

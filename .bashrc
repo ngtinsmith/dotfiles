@@ -127,3 +127,4 @@ export NVM_DIR="$HOME/.nvm"
 
 # Rust
 . "$HOME/.cargo/env"
+. "/Users/gaudencioenriquezjr/.deno/env"

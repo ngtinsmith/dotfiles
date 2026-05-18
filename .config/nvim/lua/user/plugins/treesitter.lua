@@ -1,3 +1,6 @@
+-- Disable built-in ftplugin mappings to avoid conflicts with textobjects.
+vim.g.no_plugin_maps = true
+
 require('nvim-treesitter').setup {
     highlight = {
         enable = true,

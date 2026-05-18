@@ -144,3 +144,4 @@ export PATH="/usr/local/opt/openjdk/bin:$PATH"
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+. "/Users/gaudencioenriquezjr/.deno/env"

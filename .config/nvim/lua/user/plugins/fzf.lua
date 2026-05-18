@@ -1,8 +1,14 @@
 local fzf = require('fzf-lua')
 
--- TODO: fzf configure code_actions previewer and
--- window config
+-- TODO: fzf configure code_actions previewer and window config
 require('fzf-lua').setup({
+    winopts = {
+        backdrop = false,
+        treesitter = { enabled = false },
+        preview = {
+            scrollbar = false,
+        },
+    },
     lsp = {
         code_actions = {
             previewer = false,
@@ -15,10 +21,10 @@ require('fzf-lua').setup({
                     width = 0.5,
                     height = 0.5,
                     vertical = 'down:75%',
-                }
-            }
-        }
-    }
+                },
+            },
+        },
+    },
 })
 
 local M = {}
