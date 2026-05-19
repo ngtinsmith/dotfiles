@@ -1,18 +1,10 @@
 local fzf = require('fzf-lua')
 
 -- TODO: fzf configure code_actions previewer and window config
-require('fzf-lua').setup({
-    winopts = {
-        backdrop = false,
-        treesitter = { enabled = false },
-        preview = {
-            scrollbar = false,
-        },
-    },
+fzf.setup({
     lsp = {
         code_actions = {
             previewer = false,
-            -- preview_pager = [[ delta --hunk-header-style="omit" --file-style="omit" --width=$FZF_PREVIEW_COLUMNS ]],
             winopts = {
                 border = 'rounded',
                 preview = {
